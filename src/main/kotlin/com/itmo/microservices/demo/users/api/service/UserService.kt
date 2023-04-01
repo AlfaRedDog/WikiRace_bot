@@ -8,5 +8,4 @@ interface UserService {
     fun findUser(username: String): AppUserModel?
     fun registerUser(request: RegistrationRequest)
     fun getAccountData(requester: UserDetails): AppUserModel
-    fun deleteUser(user: UserDetails)
 }

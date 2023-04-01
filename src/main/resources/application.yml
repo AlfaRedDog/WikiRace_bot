@@ -19,7 +19,7 @@ server:
 
 security:
   secret: secret12345678
-  token-lifetime: 15m
+  token-lifetime: 60m
   refresh-token-lifetime: 30d
 
 logstash:

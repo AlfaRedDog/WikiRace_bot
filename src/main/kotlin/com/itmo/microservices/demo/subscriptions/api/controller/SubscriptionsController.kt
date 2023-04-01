@@ -21,7 +21,7 @@ class SubscriptionsController(private val subscriptionService : SubscriptionServ
 
     @PostMapping
     @Operation(
-        summary = "Register new subscription",
+        summary = "Update subscription level",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])

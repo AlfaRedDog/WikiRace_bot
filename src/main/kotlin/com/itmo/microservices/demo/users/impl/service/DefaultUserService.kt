@@ -28,7 +28,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun findUser(username: String): AppUserModel? = userRepository
-            .findByIdOrNull(username)?.toModel()
+            .findByLogin(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())

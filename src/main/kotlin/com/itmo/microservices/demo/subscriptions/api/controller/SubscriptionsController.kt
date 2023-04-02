@@ -28,7 +28,7 @@ class SubscriptionsController(private val subscriptionService : SubscriptionServ
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun updateSubscriptions (
+    suspend fun updateSubscriptions (
         @Parameter(hidden = true) @AuthenticationPrincipal user: AppUserModel,
         @Parameter request : CreateSubscriptionRequest
     ) = subscriptionService.updateSubscriptionLevel(request)

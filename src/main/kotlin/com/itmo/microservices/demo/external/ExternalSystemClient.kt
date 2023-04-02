@@ -1,3 +1,5 @@
+package com.itmo.microservices.demo.external
+
 import com.google.gson.Gson
 import okhttp3.*
 import java.io.IOException

@@ -1,13 +1,14 @@
 package com.itmo.microservices.demo.subscriptions.api.controller
 
 import com.itmo.microservices.demo.subscriptions.api.models.CreateSubscriptionRequest
-import com.itmo.microservices.demo.subscriptions.api.service.SubscriptionService
+import com.itmo.microservices.demo.subscriptions.impl.service.SubscriptionService
 import com.itmo.microservices.demo.users.api.model.AppUserModel
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import kotlinx.coroutines.runBlocking
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,8 +28,8 @@ class SubscriptionsController(private val subscriptionService : SubscriptionServ
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    suspend fun updateSubscriptions (
+    fun updateSubscriptions (
         @Parameter(hidden = true) @AuthenticationPrincipal user: AppUserModel,
         @RequestBody request : CreateSubscriptionRequest
-    ) = subscriptionService.updateSubscriptionLevel(request)
+    ) = runBlocking { subscriptionService.updateSubscriptionLevel(request) }
 }

@@ -9,7 +9,6 @@ import javax.persistence.Id
 class AppUser {
 
     @Id
-    var id: UUID = UUID.randomUUID()
     @Column(unique = true)
     var login: String? = null
     var password: String? = null

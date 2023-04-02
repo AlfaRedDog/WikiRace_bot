@@ -7,25 +7,25 @@ import ru.quipy.streams.AggregateSubscriptionsManager
 import java.time.LocalDate
 import javax.annotation.PostConstruct
 
-//@Component
-//class PaymentSubscriber(
-//    private val paymentRepository: PaymentRepository,
-//    private val subscriptionsManager: AggregateSubscriptionsManager
-//) {
-//    @PostConstruct
-//    fun init(){
-//        subscriptionsManager.createSubscriber(SubscriptionAggregate::class, "payment-subscription-subscriber") {
-//            `when`(PaymentSubscriptionEvent::class) { event ->
-//                paymentRepository.save(
-//                    PaymentSubscriptionModel(
-//                        userId = event.userId,
-//                        level = event.level,
-//                        transactionId = event.transactionId,
-//                        status = event.status,
-//                        updateTime = LocalDate.now()
-//                    )
-//                )
-//            }
-//        }
-//    }
-//}
+@Component
+class PaymentSubscriber(
+    private val paymentRepository: PaymentRepository,
+    private val subscriptionsManager: AggregateSubscriptionsManager
+) {
+    @PostConstruct
+    fun init(){
+        subscriptionsManager.createSubscriber(SubscriptionAggregate::class, "payment-subscription-subscriber") {
+            `when`(PaymentSubscriptionEvent::class) { event ->
+                paymentRepository.save(
+                    PaymentSubscriptionModel(
+                        userId = event.userId,
+                        level = event.level,
+                        transactionId = event.transactionId,
+                        status = event.status,
+                        updateTime = LocalDate.now()
+                    )
+                )
+            }
+        }
+    }
+}

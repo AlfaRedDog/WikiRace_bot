@@ -11,7 +11,7 @@ import java.util.*
 @Document("subscription-update-model")
 data class SubscriptionUpdateModel(
     @Id
-    val userId : UUID,
+    val userId : String,
     val level: SubscriptionLevel,
     val updateTime : LocalDate
 )

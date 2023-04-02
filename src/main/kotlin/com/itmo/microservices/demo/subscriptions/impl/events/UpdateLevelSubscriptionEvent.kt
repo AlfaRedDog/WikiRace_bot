@@ -8,6 +8,6 @@ import java.util.*
 
 @DomainEvent("update-subscription-level-event")
 data class UpdateLevelSubscriptionEvent(
-    val userId : UUID,
+    val userId : String,
     val level: SubscriptionLevel
     ) : Event<SubscriptionAggregate>(name = "update-subscription-level-event")

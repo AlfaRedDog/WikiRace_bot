@@ -8,7 +8,7 @@ import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Component
-class SubscriptionStatusHistory(
+class SubscriptionSubscriber(
     private val subscriptionRepository: SubscriptionRepository,
     private val subscriptionsManager: AggregateSubscriptionsManager
 ) {

@@ -16,6 +16,6 @@ class SubscriptionBoundedContextConfig {
     private lateinit var eventSourcingServiceFactory: EventSourcingServiceFactory
 
     @Bean
-    fun subscriptionEventSourcingService(): EventSourcingService<UUID, SubscriptionAggregate, SubscriptionAggregateState> =
+    fun subscriptionEventSourcingService(): EventSourcingService<String, SubscriptionAggregate, SubscriptionAggregateState> =
         eventSourcingServiceFactory.create()
 }

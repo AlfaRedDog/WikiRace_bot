@@ -10,7 +10,8 @@ spring:
     database: postgresql
     hibernate:
       ddl-auto: update
-
+  kafka:
+    bootstrap-servers: localhost:9092
 server:
   error:
     include-exception: false

@@ -64,7 +64,7 @@ class JwtTokenManager(private val properties: SecurityProperties) {
     }
 
     //check if the token has expired
-    private fun isTokenExpired(token: String): Boolean {
+    fun isTokenExpired(token: String): Boolean {
         val expiration = getExpirationDateFromToken(token)
         return expiration.before(Date())
     }

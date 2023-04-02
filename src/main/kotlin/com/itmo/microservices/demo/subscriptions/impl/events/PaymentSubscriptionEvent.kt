@@ -7,9 +7,11 @@ import ru.quipy.domain.Event
 import java.time.LocalDate
 import java.util.*
 
-@DomainEvent("update-subscription-level-event")
-data class UpdateLevelSubscriptionEvent(
+@DomainEvent("payment-subscription-event")
+data class PaymentSubscriptionEvent(
     val userId : String,
     val level: SubscriptionLevel,
-    val updateTime: LocalDate
-    ) : Event<SubscriptionAggregate>(name = "update-subscription-level-event")
+    val transactionId: String,
+    val status: String,
+    val paymentTime : LocalDate
+    ) : Event<SubscriptionAggregate>(name = "payment-subscription-event")

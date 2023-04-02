@@ -3,7 +3,6 @@ package com.itmo.microservices.demo.subscriptions.api.controller
 import com.itmo.microservices.demo.subscriptions.api.models.CreateSubscriptionRequest
 import com.itmo.microservices.demo.subscriptions.api.service.SubscriptionService
 import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -30,6 +29,6 @@ class SubscriptionsController(private val subscriptionService : SubscriptionServ
     )
     suspend fun updateSubscriptions (
         @Parameter(hidden = true) @AuthenticationPrincipal user: AppUserModel,
-        @Parameter request : CreateSubscriptionRequest
+        @RequestBody request : CreateSubscriptionRequest
     ) = subscriptionService.updateSubscriptionLevel(request)
 }

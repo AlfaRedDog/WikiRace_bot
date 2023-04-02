@@ -9,9 +9,8 @@ import com.itmo.microservices.demo.external.ExternalSystemApi
 import com.itmo.microservices.demo.subscriptions.api.models.CreateSubscriptionRequest
 import com.itmo.microservices.demo.subscriptions.api.models.SubscriptionLevel
 import com.itmo.microservices.demo.subscriptions.api.service.SubscriptionService
-import com.itmo.microservices.demo.subscriptions.impl.model.SubscriptionAggregate
-import com.itmo.microservices.demo.subscriptions.impl.model.SubscriptionAggregateState
-import com.itmo.microservices.demo.subscriptions.impl.repository.SubscriptionRepository
+import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregate
+import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregateState
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
 
@@ -30,15 +29,16 @@ class SubscriptionService(
         if(subscription.level == request.Level){
             throw RePurchaseOfSubscription()
         }
-        var sum = when(request.Level){
+        val sum = when(request.Level){
             SubscriptionLevel.FIRST_LEVEL -> 0
             SubscriptionLevel.SECOND_lEVEL -> 10
             SubscriptionLevel.THIRD_LEVEL -> 20
         }
 
         val subscriptionPaymentResponseDTO = externalSys.subscriptionPayment(sum)
-        //paymentEventSourcingService.update(request.UserId){it.}
-        //TODO("реализовать сохранение логов транзакций")
+        subscriptionEventSourcingService.update(request.UserId){
+            it.paymentSubscriptionCommand(request.UserId, request.Level, subscriptionPaymentResponseDTO)
+        }
 
         if (subscriptionPaymentResponseDTO.status == "FAILURE") {
             throw PaymentException()

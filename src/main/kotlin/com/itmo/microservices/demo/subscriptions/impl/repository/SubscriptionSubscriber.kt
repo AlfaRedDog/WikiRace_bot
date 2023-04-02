@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.subscriptions.impl.repository
 
 import com.itmo.microservices.demo.subscriptions.impl.events.UpdateLevelSubscriptionEvent
-import com.itmo.microservices.demo.subscriptions.impl.model.SubscriptionAggregate
+import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregate
 import org.springframework.stereotype.Component
 import ru.quipy.streams.AggregateSubscriptionsManager
 import java.time.LocalDate

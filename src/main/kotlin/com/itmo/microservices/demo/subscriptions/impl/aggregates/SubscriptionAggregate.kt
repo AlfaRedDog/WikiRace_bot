@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.subscriptions.impl.model
+package com.itmo.microservices.demo.subscriptions.impl.aggregates
 
 import ru.quipy.core.annotations.AggregateType
 import ru.quipy.domain.Aggregate

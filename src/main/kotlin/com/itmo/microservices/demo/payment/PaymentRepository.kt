@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.subscriptions.impl.repository
+package com.itmo.microservices.demo.payment
 
 import com.itmo.microservices.demo.subscriptions.api.models.SubscriptionLevel
 import org.springframework.data.annotation.Id
@@ -8,14 +8,17 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.util.*
 
+
 @Document("subscription-update-model")
-data class SubscriptionUpdateModel(
+data class PaymentSubscriptionModel(
     @Id
     val userId : String,
     val level: SubscriptionLevel,
+    val transactionId: String,
+    val status: String,
     val updateTime : LocalDate
 )
 
 @Repository
-interface SubscriptionRepository : MongoRepository<SubscriptionUpdateModel, String> {
+interface PaymentRepository : MongoRepository<PaymentSubscriptionModel, String> {
 }

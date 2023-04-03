@@ -5,6 +5,6 @@ import com.itmo.microservices.demo.users.impl.entity.AppUser
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository : JpaRepository<AppUser, String> {
-    fun findByLogin(login: String): AppUser?
+interface UserRepository : JpaRepository<AppUser, String>{
+    fun findByUsername(username: String): AppUser?
 }

@@ -25,17 +25,21 @@ class SubscriptionService(
         val client = ExternalSystemClient(ForkJoinPool())
         externalSys = ExternalSystemApi(client)
     }
+
     suspend fun updateSubscriptionLevel(request: UpdateSubscriptionRequest): DefaultResponse {
         subscriptionEventSourcingService.getState(request.userId)
             ?: createSubscription(request)
         val subscription = subscriptionEventSourcingService.getState(request.userId)
             ?: throw WrongArgumentsException(request.userId)
+
         if (subscription.userId != request.userId) {
             throw WrongArgumentsException(request.userId)
         }
+
         if(subscription.level == request.level){
             throw RePurchaseOfSubscription()
         }
+
         val sum = when(request.level){
             SubscriptionLevel.FIRST_LEVEL -> 0
             SubscriptionLevel.SECOND_LEVEL -> 10

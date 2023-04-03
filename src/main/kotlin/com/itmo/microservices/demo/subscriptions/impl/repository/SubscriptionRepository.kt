@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.util.*
 
 @Document("subscription-update-model")
@@ -13,8 +12,8 @@ data class SubscriptionUpdateModel(
     @Id
     val userId : String,
     val level: SubscriptionLevel,
-    val updateTime : LocalDate,
-    val createTime : LocalDate
+    val updateTime : Date,
+    val createTime : Date
 )
 
 @Repository

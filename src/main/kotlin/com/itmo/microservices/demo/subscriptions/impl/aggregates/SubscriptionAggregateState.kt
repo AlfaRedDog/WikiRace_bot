@@ -7,17 +7,15 @@ import com.itmo.microservices.demo.subscriptions.impl.events.CreateSubscriptionE
 import com.itmo.microservices.demo.subscriptions.impl.events.UpdateLevelSubscriptionEvent
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
-import java.time.LocalDate
+import java.util.*
 
 class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate> {
     lateinit var userId : String
     lateinit var level: SubscriptionLevel
     lateinit var status : String
-    //var transactions : ArrayList<PaymentResponseDTO> = ArrayList()
-    // TODO возможно стоит объеденить transactionID и status в массив transactions
     lateinit var transactionId : String
-    lateinit var updateTime : LocalDate
-    var createTime : LocalDate = LocalDate.now()
+    lateinit var updateTime : Date
+    var createTime : Date = Calendar.getInstance().time
 
     override fun getId(): String = userId
 
@@ -28,7 +26,7 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
         return UpdateLevelSubscriptionEvent(
             userId = userId,
             level = level,
-            updateTime = LocalDate.now()
+            updateTime = Calendar.getInstance().time
         )
     }
 
@@ -38,7 +36,7 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
             level = level,
             transactionId = paymentDTO.id,
             status = paymentDTO.status,
-            paymentTime = LocalDate.now()
+            paymentTime = Calendar.getInstance().time
         )
     }
 
@@ -46,7 +44,7 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
         return CreateSubscriptionEvent(
             userId = userId,
             level = level,
-            createTime = LocalDate.now()
+            createTime = Calendar.getInstance().time
         )
     }
 
@@ -61,7 +59,7 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
     fun createNewSubscription(event : CreateSubscriptionEvent){
         userId = event.userId
         level = event.level
-        createTime = LocalDate.now()
+        createTime = Calendar.getInstance().time
     }
 
     @StateTransitionFunc
@@ -70,6 +68,6 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
         level = event.level
         transactionId = event.transactionId
         status = event.status
-        updateTime = LocalDate.now()
+        updateTime = Calendar.getInstance().time
     }
 }

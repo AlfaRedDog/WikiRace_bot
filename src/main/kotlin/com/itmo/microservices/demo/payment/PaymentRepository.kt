@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.util.*
 
 
@@ -16,7 +15,7 @@ data class PaymentSubscriptionModel(
     val level: SubscriptionLevel,
     val transactionId: String,
     val status: String,
-    val updateTime : LocalDate
+    val updateTime : Date
 )
 
 @Repository

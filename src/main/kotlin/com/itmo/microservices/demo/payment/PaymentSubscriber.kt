@@ -4,7 +4,7 @@ import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAgg
 import com.itmo.microservices.demo.subscriptions.impl.events.PaymentSubscriptionEvent
 import org.springframework.stereotype.Component
 import ru.quipy.streams.AggregateSubscriptionsManager
-import java.time.LocalDate
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Component
@@ -22,7 +22,7 @@ class PaymentSubscriber(
                         level = event.level,
                         transactionId = event.transactionId,
                         status = event.status,
-                        updateTime = LocalDate.now()
+                        updateTime = Calendar.getInstance().time
                     )
                 )
             }

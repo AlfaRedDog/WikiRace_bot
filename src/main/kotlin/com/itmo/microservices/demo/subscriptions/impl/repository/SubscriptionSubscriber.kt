@@ -6,7 +6,7 @@ import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAgg
 import com.itmo.microservices.demo.subscriptions.impl.events.CreateSubscriptionEvent
 import org.springframework.stereotype.Component
 import ru.quipy.streams.AggregateSubscriptionsManager
-import java.time.LocalDate
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Component
@@ -26,7 +26,7 @@ class SubscriptionSubscriber(
                     SubscriptionUpdateModel(
                         userId = event.userId,
                         level = event.level,
-                        updateTime = LocalDate.now(),
+                        updateTime = Calendar.getInstance().time,
                         createTime = subscriptionValues.createTime
                     )
                 )
@@ -39,8 +39,8 @@ class SubscriptionSubscriber(
                     SubscriptionUpdateModel(
                         userId = event.userId,
                         level = event.level,
-                        updateTime = LocalDate.now(),
-                        createTime = LocalDate.now()
+                        updateTime = Calendar.getInstance().time,
+                        createTime = Calendar.getInstance().time
                     )
                 )
             }

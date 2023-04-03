@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.*
 
 
-@Document("subscription-update-model")
+@Document("payment-update-model")
 data class PaymentSubscriptionModel(
     @Id
     val userId : String,

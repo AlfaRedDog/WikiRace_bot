@@ -8,6 +8,6 @@ import java.time.Duration
 @Component
 class SecurityProperties {
     var secret: String = "sec12345678"
-    var tokenLifetime: Duration = Duration.ofMinutes(15)
+    var tokenLifetime: Duration = Duration.ofMinutes(60)
     var refreshTokenLifetime: Duration = Duration.ofDays(30)
 }

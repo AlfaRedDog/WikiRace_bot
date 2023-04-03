@@ -12,4 +12,4 @@ spring:
       path: /h2-console
 
 security:
-  token-lifetime: 30m
+  token-lifetime: 120m

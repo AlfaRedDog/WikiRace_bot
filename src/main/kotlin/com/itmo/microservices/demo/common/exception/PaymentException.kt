@@ -6,5 +6,5 @@ import java.lang.RuntimeException
 import java.util.*
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-class PaymentException() : RuntimeException("payment is failed") {
+class PaymentException() : RuntimeException("Payment is failed") {
 }

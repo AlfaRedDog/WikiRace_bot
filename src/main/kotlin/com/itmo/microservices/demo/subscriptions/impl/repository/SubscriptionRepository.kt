@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 import java.util.*
 
-@Document("subscription-update-model")
-data class SubscriptionUpdateModel(
+@Document("subscription-model")
+data class SubscriptionModel(
     @Id
     val userId : String,
     val level: SubscriptionLevel,
@@ -17,5 +17,5 @@ data class SubscriptionUpdateModel(
 )
 
 @Repository
-interface SubscriptionRepository : MongoRepository<SubscriptionUpdateModel, String> {
+interface SubscriptionRepository : MongoRepository<SubscriptionModel, String> {
 }

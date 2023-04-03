@@ -23,7 +23,7 @@ class SubscriptionSubscriber(
                     throw WrongArgumentsException(event.userId)
                 val subscriptionValues = subscription.get()
                 subscriptionRepository.save(
-                    SubscriptionUpdateModel(
+                    SubscriptionModel(
                         userId = event.userId,
                         level = event.level,
                         updateTime = Calendar.getInstance().time,
@@ -36,7 +36,7 @@ class SubscriptionSubscriber(
         subscriptionsManager.createSubscriber(SubscriptionAggregate::class, "subscription-create-subscriber") {
             `when`(CreateSubscriptionEvent::class) { event ->
                 subscriptionRepository.save(
-                    SubscriptionUpdateModel(
+                    SubscriptionModel(
                         userId = event.userId,
                         level = event.level,
                         updateTime = Calendar.getInstance().time,

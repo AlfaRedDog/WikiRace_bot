@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 
-@Document("payment-update-model")
+@Document("payment-subscription-model")
 data class PaymentSubscriptionModel(
     @Id
     val userId : String,

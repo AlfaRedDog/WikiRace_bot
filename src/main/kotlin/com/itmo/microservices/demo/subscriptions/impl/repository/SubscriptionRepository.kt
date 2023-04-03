@@ -13,7 +13,8 @@ data class SubscriptionUpdateModel(
     @Id
     val userId : String,
     val level: SubscriptionLevel,
-    val updateTime : LocalDate
+    val updateTime : LocalDate,
+    val createTime : LocalDate
 )
 
 @Repository

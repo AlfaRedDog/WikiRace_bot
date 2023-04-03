@@ -7,7 +7,7 @@ import com.itmo.microservices.demo.common.exception.RePurchaseOfSubscription
 import com.itmo.microservices.demo.common.exception.WrongArgumentsException
 import com.itmo.microservices.demo.external.ExternalSystemApi
 import com.itmo.microservices.demo.external.ExternalSystemClient
-import com.itmo.microservices.demo.subscriptions.api.models.CreateSubscriptionRequest
+import com.itmo.microservices.demo.subscriptions.api.models.UpdateSubscriptionRequest
 import com.itmo.microservices.demo.subscriptions.api.models.SubscriptionLevel
 import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregate
 import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregateState
@@ -28,39 +28,49 @@ class SubscriptionService(
         externalSys = ExternalSystemApi(client);
     }
 
-
-    suspend fun updateSubscriptionLevel(request: CreateSubscriptionRequest): DefaultResponse {
+    suspend fun updateSubscriptionLevel(request: UpdateSubscriptionRequest): DefaultResponse {
         initExternalSystem()
-        val subscription = subscriptionEventSourcingService.getState(request.UserId)
-            ?: throw WrongArgumentsException(request.UserId)
-        if (subscription.userId != request.UserId) {
-            throw WrongArgumentsException(request.UserId)
+        subscriptionEventSourcingService.getState(request.userId)
+            ?: CreateSubscription(request)
+        val subscription = subscriptionEventSourcingService.getState(request.userId)
+            ?: throw WrongArgumentsException(request.userId)
+        if (subscription.userId != request.userId) {
+            throw WrongArgumentsException(request.userId)
         }
-        if(subscription.level == request.Level){
+        if(subscription.level == request.level){
             throw RePurchaseOfSubscription()
         }
-        val sum = when(request.Level){
+        val sum = when(request.level){
             SubscriptionLevel.FIRST_LEVEL -> 0
-            SubscriptionLevel.SECOND_lEVEL -> 10
+            SubscriptionLevel.SECOND_LEVEL -> 10
             SubscriptionLevel.THIRD_LEVEL -> 20
         }
 
         val subscriptionPaymentResponseDTO = externalSys.subscriptionPayment(sum)
-        subscriptionEventSourcingService.update(request.UserId){
-            it.paymentSubscriptionCommand(request.UserId, request.Level, subscriptionPaymentResponseDTO)
+        subscriptionEventSourcingService.update(request.userId){
+            it.paymentSubscriptionCommand(request.userId, request.level, subscriptionPaymentResponseDTO)
         }
 
         if (subscriptionPaymentResponseDTO.status == "FAILURE") {
             throw PaymentException()
         }
 
-        subscriptionEventSourcingService.update(request.UserId){
-            it.updateLevelSubscribeCommand(request.UserId, request.Level)
+        subscriptionEventSourcingService.update(request.userId){
+            it.updateLevelSubscribeCommand(request.userId, request.level)
         }
 
         return DefaultResponse(
             status = ResponseStatus.OK,
             errors = emptyArray()
         )
+    }
+
+    suspend fun CreateSubscription(request: UpdateSubscriptionRequest){
+        subscriptionEventSourcingService.create {
+            it.createNewSubscriptionCommand(
+                userId = request.userId,
+                level = request.level
+            )
+        }
     }
 }

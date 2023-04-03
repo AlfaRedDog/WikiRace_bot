@@ -1,6 +1,5 @@
 package com.itmo.microservices.demo.users.impl.entity
 
-import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -10,13 +9,13 @@ class AppUser {
 
     @Id
     @Column(unique = true)
-    var login: String? = null
+    var username: String? = null
     var password: String? = null
 
     constructor()
 
-    constructor(login: String?, password: String?) {
-        this.login = login
+    constructor(username: String?, password: String?) {
+        this.username = username
         this.password = password
     }
 }

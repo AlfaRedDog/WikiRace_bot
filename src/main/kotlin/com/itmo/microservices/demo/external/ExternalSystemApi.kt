@@ -4,13 +4,13 @@ import com.google.gson.Gson
 import com.itmo.microservices.demo.external.models.ClientSecretRequestDto
 import com.itmo.microservices.demo.external.models.ClientSecretResponseDto
 import com.itmo.microservices.demo.external.models.ProjectIdResponseDto
-import com.itmo.microservices.demo.external.models.SubscriptionPaymentResponseDTO
+import com.itmo.microservices.demo.external.models.PaymentResponseDTO
 import okhttp3.*
 
 class ExternalSystemApi(private val client: ExternalSystemClient) {
     private val mapper = Gson()
 
-    suspend fun subscriptionPayment(sum: Int): SubscriptionPaymentResponseDTO {
+    suspend fun subscriptionPayment(sum: Int): PaymentResponseDTO {
         val requestBody = RequestBody.create(
             MediaType.parse("application/json; charset=utf-8"),
             "{\"sum\": $sum, \"clientSecret\": \"${ExternalClientSecretConfig.transactionClientSecret}\"}"
@@ -19,7 +19,7 @@ class ExternalSystemApi(private val client: ExternalSystemClient) {
             .url(ExternalSystemConfig.paymentUrl)
             .post(requestBody)
             .build()
-        return client.executeRequest(request, SubscriptionPaymentResponseDTO::class.java)
+        return client.executeRequest(request, PaymentResponseDTO::class.java)
     }
 
     suspend fun getProjectId(name: String): ProjectIdResponseDto {

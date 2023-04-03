@@ -15,10 +15,8 @@ class ExternalSystemApi(private val client: ExternalSystemClient) {
             MediaType.parse("application/json; charset=utf-8"),
             "{\"sum\": $sum, \"clientSecret\": \"${ExternalClientSecretConfig.transactionClientSecret}\"}"
         )
-        val request = Request.Builder()
-            .url(ExternalSystemConfig.paymentUrl)
-            .post(requestBody)
-            .build()
+        val request = generatePostRequest(ExternalSystemConfig.paymentUrl, requestBody)
+
         return client.executeRequest(request, PaymentResponseDTO::class.java)
     }
 
@@ -27,10 +25,7 @@ class ExternalSystemApi(private val client: ExternalSystemClient) {
             MediaType.parse("application/json; charset=utf-8"),
             "{\"name\": \"$name\"}"
         )
-        val request = Request.Builder()
-            .url(ExternalSystemConfig.projectUrl)
-            .post(requestBody)
-            .build()
+        val request = generatePostRequest(ExternalSystemConfig.projectUrl, requestBody)
 
         return client.executeRequest(
             request,
@@ -43,14 +38,19 @@ class ExternalSystemApi(private val client: ExternalSystemClient) {
             MediaType.parse("application/json; charset=utf-8"),
             mapper.toJson(clientSecretRequestDto)
         )
-        val request = Request.Builder()
-            .url(ExternalSystemConfig.clientSecretUrl)
-            .post(requestBody)
-            .build()
+        val request = generatePostRequest(ExternalSystemConfig.clientSecretUrl, requestBody)
 
         return client.executeRequest(
             request,
             ClientSecretResponseDto::class.java
         )
+    }
+
+    private fun generatePostRequest(url: String, requestBody: RequestBody): Request {
+        return Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "strong")
+            .post(requestBody)
+            .build()
     }
 }

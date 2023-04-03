@@ -7,31 +7,27 @@ import com.itmo.microservices.demo.common.exception.RePurchaseOfSubscription
 import com.itmo.microservices.demo.common.exception.WrongArgumentsException
 import com.itmo.microservices.demo.external.ExternalSystemApi
 import com.itmo.microservices.demo.external.ExternalSystemClient
-import com.itmo.microservices.demo.subscriptions.api.models.UpdateSubscriptionRequest
 import com.itmo.microservices.demo.subscriptions.api.models.SubscriptionLevel
+import com.itmo.microservices.demo.subscriptions.api.models.UpdateSubscriptionRequest
 import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregate
 import com.itmo.microservices.demo.subscriptions.impl.aggregates.SubscriptionAggregateState
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.ForkJoinPool
 
 @Service
 class SubscriptionService(
     private val subscriptionEventSourcingService : EventSourcingService<String, SubscriptionAggregate, SubscriptionAggregateState>
 ) {
-    private lateinit var externalSys: ExternalSystemApi
+    private val externalSys: ExternalSystemApi
 
-    suspend fun initExternalSystem() {
-        val executor: ExecutorService = Executors.newCachedThreadPool()
-        val client = ExternalSystemClient(executor)
-        externalSys = ExternalSystemApi(client);
+    init {
+        val client = ExternalSystemClient(ForkJoinPool())
+        externalSys = ExternalSystemApi(client)
     }
-
     suspend fun updateSubscriptionLevel(request: UpdateSubscriptionRequest): DefaultResponse {
-        initExternalSystem()
         subscriptionEventSourcingService.getState(request.userId)
-            ?: CreateSubscription(request)
+            ?: createSubscription(request)
         val subscription = subscriptionEventSourcingService.getState(request.userId)
             ?: throw WrongArgumentsException(request.userId)
         if (subscription.userId != request.userId) {
@@ -65,7 +61,7 @@ class SubscriptionService(
         )
     }
 
-    suspend fun CreateSubscription(request: UpdateSubscriptionRequest){
+    suspend fun createSubscription(request: UpdateSubscriptionRequest){
         subscriptionEventSourcingService.create {
             it.createNewSubscriptionCommand(
                 userId = request.userId,

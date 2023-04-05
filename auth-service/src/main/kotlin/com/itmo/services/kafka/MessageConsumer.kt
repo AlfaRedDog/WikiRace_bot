@@ -29,7 +29,10 @@ class MessageConsumer(private val tokenManager: JwtTokenManager, private val mes
         }
     }
 
-    @KafkaListener(topics = [KafkaConfig.Subscribe_topic], groupId = KafkaConfig.Group_id)
+    @KafkaListener(topics = [KafkaConfig.Subscribe_topic], groupId = KafkaConfig.Group_id, properties = [
+        "key.deserializer=org.apache.kafka.common.serialization.StringDeserializer",
+        "value.deserializer=com.itmo.services.kafka.models.AuthRequestMessageDeserializer",
+        "value.deserializer.type=com.itmo.services.kafka.models.AuthRequestMessage"])
     fun consumeFromSubscribe(message: AuthRequestMessage) {
         var responseMessage: UserDetails
         kotlin.runCatching { tokenManager.readAccessToken(message.token) }.onSuccess { user ->

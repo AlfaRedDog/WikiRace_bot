@@ -1,10 +1,8 @@
-package com.itmo.microservices.demo.bannedTitles.controller
+package com.itmo.microservices.demo.bannedTitles.api.controller
 
-import com.itmo.microservices.demo.bannedTitles.dto.UpdateBannedTitlesRequest
-import com.itmo.microservices.demo.bannedTitles.service.BannedTitlesService
+import com.itmo.microservices.demo.bannedTitles.api.dto.UpdateBannedTitlesRequest
+import com.itmo.microservices.demo.bannedTitles.impl.service.BannedTitlesService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

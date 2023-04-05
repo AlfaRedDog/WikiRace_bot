@@ -37,31 +37,37 @@ class JwtAuthenticationFilter() : OncePerRequestFilter() {
 
         val kafkaProps = Properties()
         kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
-        kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Group_id
+        kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Subscription_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG + ".type"] = UserDetails::class.java.name
 
         val authId: String = UUID.randomUUID().toString()
+        val consumerTopic = KafkaConfig.Subscribe_topic + "-$authId"
+        val consumer = KafkaConsumer<String, UserDetails>(kafkaProps)
+        consumer.subscribe(listOf(consumerTopic))
+
         messageProducer.produceMessage(
             AuthRequestMessage(token = token, authId = authId), KafkaConfig.Subscribe_topic
         )
 
-        val consumerTopic = KafkaConfig.Subscribe_topic + " $authId"
-        val consumer = KafkaConsumer<String, UserDetails>(kafkaProps)
-        consumer.subscribe(listOf(consumerTopic))
-
-        kotlin.runCatching {
-            while (true) {
-                val records = consumer.poll(Duration.ofMillis(10))
-                for (record: ConsumerRecord<String, UserDetails> in records) {
-                    if (record.value().authorities != mutableListOf(SimpleGrantedAuthority("ACCESS"))) throw AccessDeniedException()
-                }
-            }
-        }.onSuccess { user ->
+        kotlin.runCatching { takeResponse(consumer) }
+            .onSuccess { user ->
             SecurityContextHolder.getContext().authentication =
                 UsernamePasswordAuthenticationToken(user, token, mutableListOf(SimpleGrantedAuthority("ACCESS")))
         }
         filterChain.doFilter(request, response)
+    }
+
+    fun takeResponse(consumer : KafkaConsumer<String, UserDetails>): UserDetails{
+        while (true) {
+            val records = consumer.poll(Duration.ofMillis(10))
+            for (record: ConsumerRecord<String, UserDetails> in records) {
+                if (record.value().authorities == mutableListOf(SimpleGrantedAuthority("ACCESS")))
+                    return record.value()
+                else
+                    throw AccessDeniedException()
+            }
+        }
     }
 }

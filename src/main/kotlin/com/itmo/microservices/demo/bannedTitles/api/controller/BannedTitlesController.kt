@@ -18,7 +18,7 @@ class BannedTitlesController(private val bannedTitlesService: BannedTitlesServic
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     suspend fun updateBannedTitles(@RequestBody request: UpdateBannedTitlesRequest) {
-        bannedTitlesService.updateBannedTitles(request.userId, request.titles)
+        bannedTitlesService.updateBannedTitles(request)
     }
 
     @GetMapping("/{userId}")
@@ -26,7 +26,7 @@ class BannedTitlesController(private val bannedTitlesService: BannedTitlesServic
         summary = "Get a banned list for a user",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    suspend fun getBannedTitles(@PathVariable userId: String): List<String> {
-        return bannedTitlesService.getBannedTitlesForUser(userId)
+    suspend fun getBannedTitles(@RequestBody request: UpdateBannedTitlesRequest): List<String> {
+        return bannedTitlesService.getBannedTitlesForUser(request)
     }
 }

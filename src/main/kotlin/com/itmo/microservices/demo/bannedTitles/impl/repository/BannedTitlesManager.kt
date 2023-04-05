@@ -13,7 +13,7 @@ class BannedTitlesManager (
 ) {
     @PostConstruct
     fun init() {
-        subscriptionsManager.createSubscriber(BannedTitlesAggregate::class, "subscription-update-subscriber") {
+        subscriptionsManager.createSubscriber(BannedTitlesAggregate::class, "banned-titles-update-subscriber") {
             `when`(UpdateBannedTitlesEvent::class) { event ->
                 bannedTitlesRepository.save(
                     BannedTitlesModel(

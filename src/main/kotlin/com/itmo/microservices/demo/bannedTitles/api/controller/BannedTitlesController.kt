@@ -26,7 +26,7 @@ class BannedTitlesController(private val bannedTitlesService: BannedTitlesServic
         summary = "Get a banned list for a user",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    suspend fun getBannedTitles(@RequestBody request: UpdateBannedTitlesRequest): List<String> {
-        return bannedTitlesService.getBannedTitlesForUser(request)
+    suspend fun getBannedTitles(@PathVariable userId: String): List<String> {
+        return bannedTitlesService.getBannedTitlesForUser(userId)
     }
 }

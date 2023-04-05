@@ -9,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.kafka.retrytopic.DestinationTopic
+import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -36,9 +37,9 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
         }
         val kafkaProps = Properties()
         kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
-        kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = "subscription-group"
-        kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
-        kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
+        kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Group_id
+        kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] =  JsonDeserializer::class.java.name
+        kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = UserDetails::class.java.name
         val authId : String = UUID.randomUUID().toString()
         messageProducer.produceMessage(
             AuthRequestMessage(token = token, authId = authId),

@@ -3,17 +3,18 @@ package com.itmo.services.subscriptions.impl.aggregates
 import com.itmo.services.external.models.PaymentResponseDTO
 import com.itmo.services.subscriptions.impl.events.PaymentSubscriptionEvent
 import com.itmo.services.subscriptions.api.models.SubscriptionLevel
+import com.itmo.services.subscriptions.api.models.TransactionInfo
 import com.itmo.services.subscriptions.impl.events.CreateSubscriptionEvent
 import com.itmo.services.subscriptions.impl.events.UpdateLevelSubscriptionEvent
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
 import java.util.*
+import kotlin.collections.ArrayList
 
 class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate> {
     lateinit var userId : String
     lateinit var level: SubscriptionLevel
-    lateinit var status : String
-    lateinit var transactionId : String
+    var transactions : ArrayList<TransactionInfo> = ArrayList()
     lateinit var updateTime : Date
     var createTime : Date = Calendar.getInstance().time
 
@@ -59,15 +60,13 @@ class SubscriptionAggregateState : AggregateState<String, SubscriptionAggregate>
     fun createNewSubscription(event : CreateSubscriptionEvent){
         userId = event.userId
         level = event.level
-        createTime = Calendar.getInstance().time
+        createTime = event.createTime
     }
 
     @StateTransitionFunc
     fun createNewPaymentSubscription(event : PaymentSubscriptionEvent){
         userId = event.userId
         level = event.level
-        transactionId = event.transactionId
-        status = event.status
-        updateTime = Calendar.getInstance().time
+        transactions.add(TransactionInfo(transactionId = event.transactionId, status = event.status))
     }
 }

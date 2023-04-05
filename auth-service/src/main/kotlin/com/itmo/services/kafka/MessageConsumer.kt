@@ -2,59 +2,48 @@ package com.itmo.services.kafka
 
 import com.itmo.services.auth.impl.service.JwtTokenManager
 import com.itmo.services.kafka.config.KafkaConfig
-import com.itmo.services.kafka.models.ResponseStatusEnum
-import org.springframework.boot.configurationprocessor.json.JSONObject
+import com.itmo.services.kafka.models.AuthRequestMessage
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
 
 @Service
 class MessageConsumer(private val tokenManager: JwtTokenManager, private val messageProducer: MessageProducer) {
     @KafkaListener(topics = [KafkaConfig.Wiki_topic], groupId = KafkaConfig.Group_id)
-    fun consumeFromSubscribe(token: String) {
-        var responseMessage = JSONObject()
-        kotlin.runCatching { tokenManager.readAccessToken(token) }
-            .onSuccess {
-                responseMessage = isTokenExpired(token)
+    fun consumeFromWiki(message: AuthRequestMessage) {
+        var responseMessage: UserDetails
+        kotlin.runCatching { tokenManager.readAccessToken(message.token) }.onSuccess { user ->
+            responseMessage = if (!tokenManager.isTokenExpired(message.token)) {
+                user
+            } else {
+                User(user.username, user.password, mutableListOf(SimpleGrantedAuthority("EXPIRED")))
+            }
 
-                messageProducer.produceMessage(responseMessage.toString(), KafkaConfig.Wiki_topic)
-            }
-            .onFailure {
-                responseMessage.put("status", ResponseStatusEnum.FAILED)
-                responseMessage.put("message", "Token is invalid")
-                messageProducer.produceMessage(responseMessage.toString(), KafkaConfig.Wiki_topic)
-            }
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + " ${message.authId}")
+        }.onFailure {
+            responseMessage = User(null, null, mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + " ${message.authId}")
+        }
     }
 
     @KafkaListener(topics = [KafkaConfig.Subscribe_topic], groupId = KafkaConfig.Group_id)
-    fun consumeFromWiki(token: String) {
-        var responseMessage = JSONObject()
-        kotlin.runCatching { tokenManager.readAccessToken(token) }
-            .onSuccess {
-                responseMessage = isTokenExpired(token)
-                messageProducer.produceMessage(responseMessage.toString(), KafkaConfig.Subscribe_topic)
+    fun consumeFromSubscribe(message: AuthRequestMessage) {
+        var responseMessage: UserDetails
+        kotlin.runCatching { tokenManager.readAccessToken(message.token) }.onSuccess { user ->
+            responseMessage = if (!tokenManager.isTokenExpired(message.token)) {
+                user
+            } else {
+                User(user.username, user.password, mutableListOf(SimpleGrantedAuthority("EXPIRED")))
             }
-            .onFailure {
-                responseMessage.put("status", ResponseStatusEnum.FAILED)
-                responseMessage.put("message", "Token is invalid")
-                messageProducer.produceMessage(responseMessage.toString(), KafkaConfig.Subscribe_topic)
-            }
-    }
 
-    private fun isTokenExpired(token: String): JSONObject {
-        val isExpired = tokenManager.isTokenExpired(token)
-
-        val status = if (!isExpired) ResponseStatusEnum.SUCCESS else ResponseStatusEnum.FAILED
-
-        val message = when (status) {
-            ResponseStatusEnum.SUCCESS -> ""
-            ResponseStatusEnum.FAILED -> "Token is expired"
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + " ${message.authId}")
+        }.onFailure {
+            responseMessage = User(null, null, mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + " ${message.authId}")
         }
-
-        val responseMessage = JSONObject()
-        responseMessage.put("status", status)
-        responseMessage.put("message", message)
-
-        return responseMessage
     }
+
 }

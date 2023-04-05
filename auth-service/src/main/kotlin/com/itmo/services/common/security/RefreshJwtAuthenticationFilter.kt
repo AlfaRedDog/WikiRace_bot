@@ -20,9 +20,7 @@ class RefreshJwtAuthenticationFilter(private val tokenManager: JwtTokenManager):
             filterChain.doFilter(request, response)
             return
         }
-        kotlin.runCatching { tokenManager.readRefreshToken(token) }
-                .onSuccess { user -> SecurityContextHolder.getContext().authentication =
-                        UsernamePasswordAuthenticationToken(user, token, user.authorities) }
+        kotlin.runCatching { tokenManager.readRefreshToken(token) }.onSuccess { user -> SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(user, token, user.authorities) }
         filterChain.doFilter(request, response)
     }
 }

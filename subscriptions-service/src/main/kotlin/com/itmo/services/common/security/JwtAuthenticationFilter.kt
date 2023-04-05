@@ -14,14 +14,15 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest,
                                   response: HttpServletResponse,
                                   filterChain: FilterChain) {
-//        val token = retrieveToken(request)
-//        if (token == null) {
-//            filterChain.doFilter(request, response)
+/*      val token = retrieveToken(request)
+        if (token == null) {
+            filterChain.doFilter(request, response)*/
 //            return
 //        }
 //        kotlin.runCatching { tokenManager.readAccessToken(token) }
 //                .onSuccess { user -> SecurityContextHolder.getContext().authentication =
 //                        UsernamePasswordAuthenticationToken(user, token, user.authorities) }
-//        filterChain.doFilter(request, response)
+        filterChain.doFilter(request, response)
+        return
     }
 }

@@ -12,8 +12,7 @@ import org.springframework.web.cors.CorsConfiguration
 
 @Configuration
 class SecurityConfiguration(
-        private val authenticationFilter: JwtAuthenticationFilter,
-        private val refreshAuthenticationFilter: RefreshJwtAuthenticationFilter
+        private val authenticationFilter: JwtAuthenticationFilter
 ) : WebSecurityConfigurerAdapter() {
 
     @Bean
@@ -39,7 +38,6 @@ class SecurityConfiguration(
                 .anyRequest().hasAuthority("ACCESS")
                 .and()
                 .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-                .addFilterAfter(refreshAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
                 .headers().frameOptions().sameOrigin()
     }
 }

@@ -28,12 +28,12 @@ class DefaultUserService(private val userRepository: UserRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun findUser(username: String): AppUserModel? = userRepository
-            .findByLogin(username)?.toModel()
+            .findByUsername(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.login)
+        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
@@ -42,7 +42,7 @@ class DefaultUserService(private val userRepository: UserRepository,
 
 
     fun RegistrationRequest.toEntity(): AppUser =
-        AppUser(login = this.login,
+        AppUser(username = this.username,
             password = passwordEncoder.encode(this.password)
         )
 }

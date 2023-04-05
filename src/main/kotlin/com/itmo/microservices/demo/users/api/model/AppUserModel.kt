@@ -5,9 +5,9 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 
 data class AppUserModel(
-        val login: String,
+        val username: String,
         @JsonIgnore
         val password: String) {
 
-        fun userDetails(): UserDetails = User(login, password, emptyList())
+        fun userDetails(): UserDetails = User(username, password, emptyList())
 }

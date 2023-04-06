@@ -22,10 +22,10 @@ class MessageConsumer(private val tokenManager: JwtTokenManager, private val mes
                 User(user.username, user.password, mutableListOf(SimpleGrantedAuthority("EXPIRED")))
             }
 
-            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + " ${message.authId}")
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + "-${message.authId}")
         }.onFailure {
             responseMessage = User(null, null, mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
-            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + " ${message.authId}")
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Wiki_topic + "-${message.authId}")
         }
     }
 
@@ -45,7 +45,7 @@ class MessageConsumer(private val tokenManager: JwtTokenManager, private val mes
             messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + "-${message.authId}")
         }.onFailure {
             responseMessage = User("default", "default", mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
-            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + " ${message.authId}")
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + "-${message.authId}")
         }
     }
 

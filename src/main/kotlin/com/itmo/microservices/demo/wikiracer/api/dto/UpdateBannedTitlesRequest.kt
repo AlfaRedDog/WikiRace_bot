@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.bannedTitles.api.dto
+package com.itmo.microservices.demo.wikiracer.api.dto
 
 import java.util.*
 

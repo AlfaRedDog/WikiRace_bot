@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.bannedTitles.impl.repository
+package com.itmo.microservices.demo.wikiracer.impl.repository
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document

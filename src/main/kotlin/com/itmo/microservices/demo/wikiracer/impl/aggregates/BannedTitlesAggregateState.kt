@@ -1,6 +1,6 @@
-package com.itmo.microservices.demo.bannedTitles.impl.aggregates
+package com.itmo.microservices.demo.wikiracer.impl.aggregates
 
-import com.itmo.microservices.demo.bannedTitles.impl.events.UpdateBannedTitlesEvent
+import com.itmo.microservices.demo.wikiracer.impl.event.UpdateBannedTitlesEvent
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
 import java.util.*

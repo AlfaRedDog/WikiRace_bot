@@ -1,8 +1,8 @@
-package com.itmo.microservices.demo.bannedTitles.impl.service
+package com.itmo.microservices.demo.wikiracer.impl.service
 
-import com.itmo.microservices.demo.bannedTitles.api.dto.UpdateBannedTitlesRequest
-import com.itmo.microservices.demo.bannedTitles.impl.aggregates.BannedTitlesAggregate
-import com.itmo.microservices.demo.bannedTitles.impl.aggregates.BannedTitlesAggregateState
+import com.itmo.microservices.demo.wikiracer.api.dto.UpdateBannedTitlesRequest
+import com.itmo.microservices.demo.wikiracer.impl.aggregates.BannedTitlesAggregate
+import com.itmo.microservices.demo.wikiracer.impl.aggregates.BannedTitlesAggregateState
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
 

@@ -1,7 +1,7 @@
-package com.itmo.microservices.demo.bannedTitles.api.controller
+package com.itmo.microservices.demo.wikiracer.api.controller
 
-import com.itmo.microservices.demo.bannedTitles.api.dto.UpdateBannedTitlesRequest
-import com.itmo.microservices.demo.bannedTitles.impl.service.BannedTitlesService
+import com.itmo.microservices.demo.wikiracer.api.dto.UpdateBannedTitlesRequest
+import com.itmo.microservices.demo.wikiracer.impl.service.BannedTitlesService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus

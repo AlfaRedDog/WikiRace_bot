@@ -11,7 +11,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -43,6 +42,7 @@ class JwtAuthenticationFilter() : OncePerRequestFilter() {
         kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Subscription_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = AuthResponseMessageDeserializer::class.java.name
+        kafkaProps[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
 
         val authId: String = UUID.randomUUID().toString()
         val consumerTopic = KafkaConfig.Subscribe_topic + "-$authId"

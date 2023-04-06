@@ -49,7 +49,7 @@ class JwtAuthenticationFilter() : OncePerRequestFilter() {
         val consumer = KafkaConsumer<String, AuthResponseMessage>(kafkaProps)
         consumer.subscribe(listOf(consumerTopic))
 
-        messageProducer.produceMessage(
+        messageProducer.authProduceMessage(
             AuthRequestMessage(token = token, authId = authId), KafkaConfig.Subscribe_topic
         )
 

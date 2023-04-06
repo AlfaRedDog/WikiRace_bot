@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
 import java.net.URL
 import java.util.*
-
+import java.util.stream.Collectors
 
 
 fun getLinks(title: String): MutableList<String>? {
@@ -23,7 +23,7 @@ fun getLinks(title: String): MutableList<String>? {
             .parallelStream()
             .filter { it.startsWith("/wiki") }
             .map { it.removePrefix("/wiki/") }
-            .toList()
+            .collect(Collectors.toList())
     }
     catch (e: HttpStatusException) {
         null

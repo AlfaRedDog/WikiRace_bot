@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class MessageConsumer(private val tokenManager: JwtTokenManager, private val messageProducer: MessageProducer) {
-    @KafkaListener(topics = [KafkaConfig.Wiki_topic], groupId = KafkaConfig.Group_id)
+    @KafkaListener(topics = [KafkaConfig.Wiki_topic], groupId = KafkaConfig.Wiki_Group_id)
     fun consumeFromWiki(message: AuthRequestMessage) {
         var responseMessage: UserDetails
         kotlin.runCatching { tokenManager.readAccessToken(message.token) }.onSuccess { user ->
@@ -42,9 +42,9 @@ class MessageConsumer(private val tokenManager: JwtTokenManager, private val mes
                 User(user.username, user.password, mutableListOf(SimpleGrantedAuthority("EXPIRED")))
             }
 
-            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + " ${message.authId}")
+            messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + "-${message.authId}")
         }.onFailure {
-            responseMessage = User(null, null, mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
+            responseMessage = User("default", "default", mutableListOf(SimpleGrantedAuthority("FORBIDDEN")))
             messageProducer.produceMessageAuthResponse(responseMessage, KafkaConfig.Subscribe_topic + " ${message.authId}")
         }
     }

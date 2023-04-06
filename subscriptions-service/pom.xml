@@ -19,7 +19,7 @@
     <properties>
         <github>TIove/Wiki-bot-la-chance-final</github>
         <java.version>11</java.version>
-        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
         <common-lib.version>0.9.0-SNAPSHOT</common-lib.version>
@@ -32,6 +32,11 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json-jvm</artifactId>
+            <version>1.5.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.kafka</groupId>

@@ -3,6 +3,7 @@ package com.itmo.services.common.security
 import com.itmo.services.common.exception.AccessDeniedException
 import com.itmo.services.kafka.MessageProducer
 import com.itmo.services.kafka.config.KafkaConfig
+import com.itmo.services.kafka.deserializers.AuthResponseMessageDeserializer
 import com.itmo.services.kafka.models.AuthRequestMessage
 import com.itmo.services.kafka.models.AuthResponseMessage
 import com.itmo.services.kafka.models.ResponseStatusEnum
@@ -15,7 +16,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.time.Duration
@@ -42,7 +42,7 @@ class JwtAuthenticationFilter() : OncePerRequestFilter() {
         kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
         kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Subscription_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
-        kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java.name
+        kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = AuthResponseMessageDeserializer::class.java.name
 
         val authId: String = UUID.randomUUID().toString()
         val consumerTopic = KafkaConfig.Subscribe_topic + "-$authId"

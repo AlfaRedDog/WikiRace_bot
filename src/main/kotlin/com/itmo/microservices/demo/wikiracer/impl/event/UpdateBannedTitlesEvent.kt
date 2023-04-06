@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.wikiracer.impl.event
 
-import com.itmo.microservices.demo.wikiracer.impl.aggregates.BannedTitlesAggregate
+import com.itmo.microservices.demo.wikiracer.impl.model.BannedTitlesAggregate
 import ru.quipy.core.annotations.DomainEvent
 import ru.quipy.domain.Event
 import java.util.*

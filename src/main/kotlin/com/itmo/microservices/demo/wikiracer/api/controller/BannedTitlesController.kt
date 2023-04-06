@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.wikiracer.api.controller
 
-import com.itmo.microservices.demo.wikiracer.api.dto.UpdateBannedTitlesRequest
+import com.itmo.microservices.demo.wikiracer.api.model.RequestUpdateBannedTitlesModel
 import com.itmo.microservices.demo.wikiracer.impl.service.BannedTitlesService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -17,7 +17,7 @@ class BannedTitlesController(private val bannedTitlesService: BannedTitlesServic
         summary = "Update a banned list for a user",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    suspend fun updateBannedTitles(@RequestBody request: UpdateBannedTitlesRequest) {
+    suspend fun updateBannedTitles(@RequestBody request: RequestUpdateBannedTitlesModel) {
         bannedTitlesService.updateBannedTitles(request)
     }
 

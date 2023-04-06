@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.wikiracer.impl.aggregates
+package com.itmo.microservices.demo.wikiracer.impl.model
 
 import com.itmo.microservices.demo.wikiracer.impl.event.UpdateBannedTitlesEvent
 import ru.quipy.core.annotations.StateTransitionFunc

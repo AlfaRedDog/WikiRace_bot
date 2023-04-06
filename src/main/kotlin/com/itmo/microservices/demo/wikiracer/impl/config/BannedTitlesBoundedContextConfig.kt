@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.wikiracer.impl.config
 
-import com.itmo.microservices.demo.wikiracer.impl.aggregates.BannedTitlesAggregate
-import com.itmo.microservices.demo.wikiracer.impl.aggregates.BannedTitlesAggregateState
+import com.itmo.microservices.demo.wikiracer.impl.model.BannedTitlesAggregate
+import com.itmo.microservices.demo.wikiracer.impl.model.BannedTitlesAggregateState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

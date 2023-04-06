@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.wikiracer.impl.model
 
-import com.itmo.microservices.demo.wikiracer.impl.event.*
+import com.itmo.microservices.demo.wikiracer.impl.event.PageIndexedEvent
+import com.itmo.microservices.demo.wikiracer.impl.event.WikiRaceCreatedEvent
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
 import java.util.*
@@ -18,9 +19,7 @@ class WikiRacerAggregateState : AggregateState<UUID, WikiRacerAggregate> {
     override fun getId(): UUID = id
 
     fun createWikiRacerCommand(
-        id: UUID = UUID.randomUUID(),
         userId: UUID,
-        requestId: UUID,
         startUrl: String,
         endUrl: String,
     ): WikiRaceCreatedEvent {
@@ -28,9 +27,9 @@ class WikiRacerAggregateState : AggregateState<UUID, WikiRacerAggregate> {
         //TODO: check start url and end url
 
         return WikiRaceCreatedEvent(
-            wikiRaceId = id,
+            wikiRaceId = UUID.randomUUID(),
             userId = userId,
-            requestId = requestId,
+            requestId = UUID.randomUUID(),
             startUrl = startUrl,
             endUrl = endUrl
         )
@@ -67,7 +66,9 @@ class WikiRacerAggregateState : AggregateState<UUID, WikiRacerAggregate> {
         for (link in event.links) {
             if (!(pathMapper.containsKey(link)) and (link != event.urlRoot)) {
                 pathMapper[link] = pathMapper[event.urlRoot]!! + link
+                nextLinks.remove(event.urlRoot)
                 nextLinks.add(link)
+
             }
         }
     }

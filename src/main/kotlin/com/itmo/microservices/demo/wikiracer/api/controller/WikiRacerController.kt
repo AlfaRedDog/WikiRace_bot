@@ -10,10 +10,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/wikirace")
 class WikiRacerController(val wikiRaceService: WikiRacerService) {
 
 
-    @GetMapping("/wikirace")
+    @PostMapping("/get_short_path")
     @Operation(
         summary = "Get shortest path between two wiki articles",
         responses = [

@@ -1,13 +1,13 @@
 package com.itmo.microservices.demo.wikiracer.impl.service
 
-import com.itmo.microservices.demo.wikiracer.impl.model.WikiRacerAggregate
-import com.itmo.microservices.demo.wikiracer.impl.model.WikiRacerAggregateState
 import com.itmo.microservices.demo.wikiracer.api.model.RequestDetailsModel
 import com.itmo.microservices.demo.wikiracer.api.model.ShortestPathDetails
+import com.itmo.microservices.demo.wikiracer.impl.model.WikiRacerAggregate
+import com.itmo.microservices.demo.wikiracer.impl.model.WikiRacerAggregateState
+import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
 import java.util.*
-import org.jsoup.Jsoup
 
 
 fun getLinks(url: String): MutableList<String>? {
@@ -29,35 +29,49 @@ class WikiRacerService(
         val event = wikiRaceEsService.create {
             it.createWikiRacerCommand(
                 userId = requestDetails.userId,
-                requestId = requestDetails.requestId,
                 startUrl = requestDetails.startUrl,
                 endUrl = requestDetails.endUrl,
             )
         }
 
-        val wikiRacer = wikiRaceEsService.getState(event.wikiRaceId)
-        while (wikiRacer!!.nextLinks.size != 0) {
-            val page = wikiRacer.nextLinks.first()
-            val links = getLinks(page)
-            if (links != null) {
-                for (link in links) {
+        val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))
+        val nextLinks = LinkedList<String>()
+        nextLinks.add(event.startUrl)
 
-                    if (link == wikiRacer.endUrl)
+
+        while (nextLinks.size != 0) {
+            val page = nextLinks.first()
+            nextLinks.remove(page)
+            val links = getLinks(page)
+
+            if (links != null) {
+                val replacedLinks = links
+                    .map { l -> l.replace('.', '_') }
+                    .toList()
+                for (link in replacedLinks) {
+
+                    if (link == event.endUrl)
                         return ShortestPathDetails(
                             requestId = event.requestId,
                             userId = event.userId,
                             startUrl = event.startUrl,
                             endUrl = event.endUrl,
-                            path = wikiRacer.pathMapper[page]!! + link
+                            path = pathMapper[page]!! + link
                         )
 
-                    wikiRaceEsService.update(event.wikiRaceId) {
-                        it.indexPageCommand(
-                            requestId = event.requestId,
-                            urlRoot = page,
-                            links = links,
-                        )
+
+                    if (!(pathMapper.containsKey(link)) and (link != page)) {
+                        pathMapper[link] = pathMapper[page]!! + link
+                        nextLinks.add(link)
                     }
+
+                }
+                wikiRaceEsService.update(event.wikiRaceId) {
+                    it.indexPageCommand(
+                        requestId = event.requestId,
+                        urlRoot = page,
+                        links = replacedLinks,
+                    )
                 }
             }
         }

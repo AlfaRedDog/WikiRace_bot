@@ -18,7 +18,7 @@
 
     <properties>
         <github>TIove/0503_ShopService</github>
-        <java.version>11</java.version>
+        <java.version>16</java.version>
         <kotlin.version>1.6.10</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>

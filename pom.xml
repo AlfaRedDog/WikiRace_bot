@@ -188,6 +188,19 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.reactivestreams</groupId>
+            <artifactId>reactive-streams</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <scm>

@@ -23,17 +23,20 @@ fun getLinks(url: String): MutableList<String>? {
 
 @Service
 class WikiRacerService(
+    private val bannedTitlesService: BannedTitlesService,
     private val wikiRaceEsService: EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState>
+
 ) {
     fun findShortestPath(requestDetails: RequestDetailsModel): ShortestPathDetails {
         val event = wikiRaceEsService.create {
-            it.createWikiRacerCommand(
+            it.createWikiRacerRequestCommand(
                 userId = requestDetails.userId,
                 startUrl = requestDetails.startUrl,
                 endUrl = requestDetails.endUrl,
             )
         }
 
+        val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
         val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))
         val nextLinks = LinkedList<String>()
         nextLinks.add(event.startUrl)
@@ -42,9 +45,12 @@ class WikiRacerService(
         while (nextLinks.size != 0) {
             val page = nextLinks.first()
             nextLinks.remove(page)
+            println(page)
             val links = getLinks(page)
 
+
             if (links != null) {
+                if (bannedTitles.isNotEmpty()) links.removeAll(bannedTitles)
                 val replacedLinks = links
                     .map { l -> l.replace('.', '_') }
                     .toList()

@@ -24,7 +24,7 @@ class BannedTitlesService(
         }
     }
 
-    suspend fun getBannedTitlesForUser(userId: String): List<String> {
+     fun getBannedTitlesForUser(userId: String): List<String> {
         return bannedTitlesEventSourcingService.getState(userId)?.list ?: emptyList()
     }
 }

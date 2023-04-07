@@ -29,18 +29,15 @@ class MessageProducer {
         return ResponseEntity.ok(" message sent to " + future.get().topic())
     }
 
-    fun subscriptionProduceMessage(message: SubscriptionInfoResponseMessage, topic: String): ResponseEntity<String> {
+    fun wikiProduceMessage(message: SubscriptionInfoResponseMessage, topic: String) {
         val producerRecord: ProducerRecord<String, SubscriptionInfoResponseMessage> = ProducerRecord(topic, message)
 
         val map = mutableMapOf<String, String>()
         map[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
         map[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = "org.apache.kafka.common.serialization.StringSerializer"
         map[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java.name
-        map[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG + ".type"] = SubscriptionInfoResponseMessage::class.java.name
 
         val producer = KafkaProducer<String, SubscriptionInfoResponseMessage>(map as Map<String, Any>?)
-        val future: Future<RecordMetadata> = producer.send(producerRecord)!!
-
-        return ResponseEntity.ok(" message sent to " + future.get().topic())
+        producer.send(producerRecord)
     }
 }

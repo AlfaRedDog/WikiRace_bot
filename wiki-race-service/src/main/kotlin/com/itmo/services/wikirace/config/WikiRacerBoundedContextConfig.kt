@@ -29,5 +29,4 @@ class WikiRacerBoundedContextConfig {
     fun wikiRacerEsService(): EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState> =
         eventSourcingServiceFactory.create()
 
-
 }

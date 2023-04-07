@@ -83,16 +83,3 @@ jobs:
           mvn -B package -DskipTests -s settings.xml
           JAR_PATH=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
           echo ::set-output name=jar::${JAR_PATH}.jar
-
-      - name: Build and push image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          builder: ${{ steps.buildx.outputs.name }}
-          build-args: |
-            JAR_FILE=target/${{ steps.build.outputs.jar }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha, scope=${{ github.workflow }}
-          cache-to: type=gha, scope=${{ github.workflow }}

@@ -25,7 +25,9 @@ class MessageConsumer() {
         val consumer = KafkaConsumer<String, SubscriptionInfoResponseMessage>(kafkaProps)
         consumer.subscribe(listOf(consumerTopic))
 
-        return takeSubscriptionResponse(consumer)
+        val resp : SubscriptionInfoResponseMessage = takeSubscriptionResponse(consumer)
+        consumer.close()
+        return resp
     }
 
     fun takeSubscriptionResponse(consumer : KafkaConsumer<String, SubscriptionInfoResponseMessage>): SubscriptionInfoResponseMessage {

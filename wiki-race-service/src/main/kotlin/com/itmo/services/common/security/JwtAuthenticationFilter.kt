@@ -63,12 +63,13 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
                         token,
                         mutableListOf(SimpleGrantedAuthority("ACCESS")))
             }
+        consumer.close()
         filterChain.doFilter(request, response)
     }
 
     fun takeAuthResponse(consumer : KafkaConsumer<String, AuthResponseMessage>): AuthResponseMessage {
         while (true) {
-            val records = consumer.poll(Duration.ofMillis(10))
+            val records = consumer.poll(Duration.ofMillis(1000))
             for (record: ConsumerRecord<String, AuthResponseMessage> in records) {
                 if (record.value().status == ResponseStatusEnum.ACCESS)
                     return record.value()

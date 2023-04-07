@@ -1,5 +1,7 @@
 package com.itmo.services.wikirace.config
 
+import com.itmo.services.wikirace.impl.model.BannedTitlesAggregate
+import com.itmo.services.wikirace.impl.model.BannedTitlesAggregateState
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregate
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregateState
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,4 +31,7 @@ class WikiRacerBoundedContextConfig {
     fun wikiRacerEsService(): EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState> =
         eventSourcingServiceFactory.create()
 
+    @Bean
+    fun bannedTitlesEventSourcingService(): EventSourcingService<String, BannedTitlesAggregate, BannedTitlesAggregateState> =
+        eventSourcingServiceFactory.create()
 }

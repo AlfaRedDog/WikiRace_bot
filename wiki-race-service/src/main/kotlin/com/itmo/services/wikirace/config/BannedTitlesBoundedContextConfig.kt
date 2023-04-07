@@ -1,4 +1,4 @@
-package com.itmo.services.wikirace.impl.config
+package com.itmo.services.wikirace.config
 
 import com.itmo.services.wikirace.impl.model.BannedTitlesAggregate
 import com.itmo.services.wikirace.impl.model.BannedTitlesAggregateState

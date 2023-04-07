@@ -11,15 +11,15 @@ class BannedTitlesService(
     private val bannedTitlesEventSourcingService: EventSourcingService<String, BannedTitlesAggregate, BannedTitlesAggregateState>
 ) {
 
-    suspend fun updateBannedTitles(request: RequestUpdateBannedTitlesModel) {
+    fun updateBannedTitles(request: RequestUpdateBannedTitlesModel) {
         val exists = bannedTitlesEventSourcingService.getState(request.userId)
         if (exists != null) {
             bannedTitlesEventSourcingService.update(request.userId) {
-                it.updateBannedTitlesCommand(request.userId, request.titles, request.createTime)
+                it.updateBannedTitlesCommand(request.userId, request.titles)
             }
         } else {
             bannedTitlesEventSourcingService.create {
-                it.updateBannedTitlesCommand(request.userId, request.titles, request.createTime)
+                it.updateBannedTitlesCommand(request.userId, request.titles)
             }
         }
     }

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*
 class BannedTitlesController(private val bannedTitlesService: BannedTitlesService) {
 
     @PostMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
         summary = "Update a banned list for a user",
         responses = [

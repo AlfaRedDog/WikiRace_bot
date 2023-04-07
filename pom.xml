@@ -20,6 +20,7 @@
     <modules>
         <module>auth-service</module>
         <module>subscriptions-service</module>
+        <module>wiki-race-service</module>
     </modules>
 
 </project>

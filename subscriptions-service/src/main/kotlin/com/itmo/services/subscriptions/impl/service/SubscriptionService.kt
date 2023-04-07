@@ -67,7 +67,7 @@ class SubscriptionService(
 
     suspend fun getSubscriptionInfoByUsername(username: String): SubscriptionLevel {
         return subscriptionEventSourcingService.getState(username)?.level
-            ?: return SubscriptionLevel.FIRST_LEVEL
+            ?: throw WrongArgumentsException("User not found")
     }
 
     suspend fun createSubscription(request: UpdateSubscriptionRequest) {

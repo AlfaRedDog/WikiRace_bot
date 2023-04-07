@@ -53,7 +53,7 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
             AuthRequestMessage(token = token, authId = authId), KafkaConfig.Wiki_topic
         )
 
-        kotlin.runCatching { takeAuthResponse(consumer) }
+        kotlin.runCatching { takeResponse(consumer) }
             .onSuccess { responseMessage ->
                 SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(
@@ -66,7 +66,7 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
         filterChain.doFilter(request, response)
     }
 
-    fun takeAuthResponse(consumer : KafkaConsumer<String, AuthResponseMessage>): AuthResponseMessage {
+    fun takeResponse(consumer : KafkaConsumer<String, AuthResponseMessage>): AuthResponseMessage {
         while (true) {
             val records = consumer.poll(Duration.ofMillis(10))
             for (record: ConsumerRecord<String, AuthResponseMessage> in records) {

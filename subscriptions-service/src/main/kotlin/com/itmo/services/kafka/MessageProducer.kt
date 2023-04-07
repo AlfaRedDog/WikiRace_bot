@@ -29,7 +29,7 @@ class MessageProducer {
         return ResponseEntity.ok(" message sent to " + future.get().topic())
     }
 
-    fun wikiProduceMessage(message: SubscriptionInfoResponseMessage, topic: String) {
+/*    fun wikiProduceMessage(message: SubscriptionInfoResponseMessage, topic: String) {
         val producerRecord: ProducerRecord<String, SubscriptionInfoResponseMessage> = ProducerRecord(topic, message)
 
         val map = mutableMapOf<String, String>()
@@ -39,5 +39,5 @@ class MessageProducer {
 
         val producer = KafkaProducer<String, SubscriptionInfoResponseMessage>(map as Map<String, Any>?)
         producer.send(producerRecord)
-    }
+    }*/
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class MessageConsumer(private val messageProducer: MessageProducer,
                       private val subscriptionService : SubscriptionService) {
-    @KafkaListener(
+/*    @KafkaListener(
         topics = [KafkaConfig.Wiki_topic],
         groupId = KafkaConfig.Wiki_Group_id,
         properties = ["key.deserializer=org.apache.kafka.common.serialization.StringDeserializer",
@@ -34,5 +34,5 @@ class MessageConsumer(private val messageProducer: MessageProducer,
                     KafkaConfig.Wiki_topic + "-${message.topicId}"
                 )
             }
-    }
+    }*/
 }

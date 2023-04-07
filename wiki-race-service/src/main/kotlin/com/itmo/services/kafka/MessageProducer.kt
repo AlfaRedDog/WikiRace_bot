@@ -1,6 +1,8 @@
 package com.itmo.services.kafka
 
 import com.itmo.services.kafka.models.AuthRequestMessage
+import com.itmo.services.kafka.models.SubscriptionInfoRequestMessage
+import com.itmo.services.kafka.models.SubscriptionInfoResponseMessage
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -26,5 +28,17 @@ class MessageProducer {
         val future: Future<RecordMetadata> = producer.send(producerRecord)!!
 
         return ResponseEntity.ok(" message sent to " + future.get().topic())
+    }
+
+    fun wikiProduceMessage(message: SubscriptionInfoRequestMessage, topic: String) {
+        val producerRecord: ProducerRecord<String, SubscriptionInfoRequestMessage> = ProducerRecord(topic, message)
+
+        val map = mutableMapOf<String, String>()
+        map[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        map[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = "org.apache.kafka.common.serialization.StringSerializer"
+        map[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java.name
+
+        val producer = KafkaProducer<String, SubscriptionInfoRequestMessage>(map as Map<String, Any>?)
+        producer.send(producerRecord)
     }
 }

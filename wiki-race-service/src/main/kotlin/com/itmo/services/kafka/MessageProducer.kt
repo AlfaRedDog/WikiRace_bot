@@ -24,6 +24,7 @@ class MessageProducer {
 
         val producer = KafkaProducer<String, AuthRequestMessage>(map as Map<String, Any>?)
         val future: Future<RecordMetadata> = producer.send(producerRecord)!!
+        producer.close()
 
         return ResponseEntity.ok(" message sent to " + future.get().topic())
     }

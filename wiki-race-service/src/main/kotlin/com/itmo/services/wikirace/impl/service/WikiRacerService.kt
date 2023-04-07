@@ -18,14 +18,9 @@ fun getLinks(title: String): MutableList<String>? {
     val url = "$wiki$title"
     val doc = Jsoup.parse(URL(url).openStream(), "ISO-8859-1", url)
     return try {
-        doc.select("p a[href]")
-            .map { col -> col.attr("href") }
-            .parallelStream()
-            .filter { it.startsWith("/wiki") }
-            .map { it.removePrefix("/wiki/") }
-            .collect(Collectors.toList())
-    }
-    catch (e: HttpStatusException) {
+        doc.select("p a[href]").map { col -> col.attr("href") }.parallelStream().filter { it.startsWith("/wiki") }
+            .map { it.removePrefix("/wiki/") }.collect(Collectors.toList())
+    } catch (e: HttpStatusException) {
         null
     }
 }
@@ -50,22 +45,19 @@ class WikiRacerService(
         val nextLinks = LinkedList<String>()
         nextLinks.add(event.startUrl)
 
-
         while (nextLinks.size != 0) {
             val page = nextLinks.first()
             nextLinks.remove(page)
             val links = getLinks(page)
 
-
             if (links != null) {
-                if (bannedTitles.isNotEmpty()) links.removeAll(bannedTitles)
-                val replacedLinks = links
-                    .map { l -> l.replace('.', '_') }
-                    .toList()
+                if (bannedTitles.isNotEmpty()) {
+                    links.removeAll(bannedTitles)
+                }
+                val replacedLinks = links.map { l -> l.replace('.', '_') }.toList()
+
                 for (link in replacedLinks) {
-
                     if (link == event.endUrl) {
-
                         wikiRaceEsService.update(event.wikiRaceId) {
                             it.closeWikiRacerRequestCommand(
                                 userId = event.userId,
@@ -84,7 +76,6 @@ class WikiRacerService(
                             path = pathMapper[page]!! + link
                         )
                     }
-
 
                     if (!(pathMapper.containsKey(link)) and (link != page)) {
                         pathMapper[link] = pathMapper[page]!! + link
@@ -110,6 +101,5 @@ class WikiRacerService(
             endUrl = event.endUrl,
             path = null
         )
-
     }
 }

@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/wikirace")
 class WikiRacerController(val wikiRaceService: WikiRacerService) {
-
-
     @PostMapping("/get_short_path")
     @Operation(
         summary = "Get shortest path between two wiki articles",

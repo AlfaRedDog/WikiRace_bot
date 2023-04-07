@@ -17,7 +17,7 @@ import java.util.concurrent.ForkJoinPool
 
 @Service
 class SubscriptionService(
-    private val subscriptionEventSourcingService : EventSourcingService<String, SubscriptionAggregate, SubscriptionAggregateState>
+    private val subscriptionEventSourcingService: EventSourcingService<String, SubscriptionAggregate, SubscriptionAggregateState>
 ) {
     private val externalSys: ExternalSystemApi
 
@@ -36,18 +36,18 @@ class SubscriptionService(
             throw WrongArgumentsException(request.userId)
         }
 
-        if(subscription.level == request.level){
+        if (subscription.level == request.level) {
             throw RePurchaseOfSubscription()
         }
 
-        val sum = when(request.level){
+        val sum = when (request.level) {
             SubscriptionLevel.FIRST_LEVEL -> 0
             SubscriptionLevel.SECOND_LEVEL -> 10
             SubscriptionLevel.THIRD_LEVEL -> 20
         }
 
         val subscriptionPaymentResponseDTO = externalSys.subscriptionPayment(sum)
-        subscriptionEventSourcingService.update(request.userId){
+        subscriptionEventSourcingService.update(request.userId) {
             it.paymentSubscriptionCommand(request.userId, request.level, subscriptionPaymentResponseDTO)
         }
 
@@ -55,7 +55,7 @@ class SubscriptionService(
             throw PaymentException()
         }
 
-        subscriptionEventSourcingService.update(request.userId){
+        subscriptionEventSourcingService.update(request.userId) {
             it.updateLevelSubscribeCommand(request.userId, request.level)
         }
 
@@ -65,12 +65,12 @@ class SubscriptionService(
         )
     }
 
-    suspend fun getSubscriptionInfoByUsername(username : String) : SubscriptionLevel{
+    suspend fun getSubscriptionInfoByUsername(username: String): SubscriptionLevel {
         return subscriptionEventSourcingService.getState(username)?.level
             ?: throw WrongArgumentsException("User not found")
     }
 
-    suspend fun createSubscription(request: UpdateSubscriptionRequest){
+    suspend fun createSubscription(request: UpdateSubscriptionRequest) {
         subscriptionEventSourcingService.create {
             it.createNewSubscriptionCommand(
                 userId = request.userId,

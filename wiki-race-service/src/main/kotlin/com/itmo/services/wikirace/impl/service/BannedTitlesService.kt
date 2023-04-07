@@ -8,7 +8,7 @@ import ru.quipy.core.EventSourcingService
 
 @Service
 class BannedTitlesService(
-    private val bannedTitlesEventSourcingService : EventSourcingService<String, BannedTitlesAggregate, BannedTitlesAggregateState>
+    private val bannedTitlesEventSourcingService: EventSourcingService<String, BannedTitlesAggregate, BannedTitlesAggregateState>
 ) {
 
     suspend fun updateBannedTitles(request: RequestUpdateBannedTitlesModel) {
@@ -24,7 +24,7 @@ class BannedTitlesService(
         }
     }
 
-     fun getBannedTitlesForUser(userId: String): List<String> {
+    fun getBannedTitlesForUser(userId: String): List<String> {
         return bannedTitlesEventSourcingService.getState(userId)?.list ?: emptyList()
     }
 }

@@ -5,6 +5,13 @@ from aiogram.dispatcher.filters import Command
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 import requests
+import aiohttp
+import pymongo
+
+# Подключение к MongoDB
+mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_db = mongo_client['mydatabase']
+mongo_col = mongo_db['access_tokens']
 
 # create tg bot instance and set token
 secret_key = "c3I5JLzXzyUq2Hy9T867JZp0oy2Ppmgg"
@@ -14,9 +21,26 @@ storage = MemoryStorage()
 # Create a dispatcher instance
 dp = Dispatcher(bot, storage=storage)
 
+URL_wikirace = "http://localhost:8206"
+URL_subscriptions = "http://localhost:8204"
+URL_auth = "http://localhost:8202"
+
 
 class AddExceptionArticle(StatesGroup):
     waiting_for_article = State()
+
+
+class DeleteExceptionArticle(StatesGroup):
+    waiting_for_article: State = State()
+
+
+# function to get access token by user_id
+async def get_access_token(user_id):
+    token = mongo_col.find_one({"user_id": user_id})
+    if token:
+        return token['access_token']
+    else:
+        return None
 
 
 # function checking if message is not empty and if it is not empty, return message
@@ -67,13 +91,21 @@ async def get_path_b(message: types.Message, state: FSMContext):
     b = message.text
     async with state.proxy() as data:
         data["b"] = b
-        # Получаем путь от API
         try:
-            response = await requests.get("http://localhost:8202/api/path", data={"A": a, "B": b})
-            response.raise_for_status()
-            path = response.json()["path"]
-            await message.answer(path)
-        except requests.exceptions.RequestException as e:
+            user_id = str(message.from_user.id)
+            access_token = await get_access_token(user_id)
+            if not access_token:
+                await message.answer('Вы не авторизованы, выполните команду /login')
+                return
+            headers = {"Authorization": f"Bearer {access_token}"}
+            async with aiohttp.ClientSession() as session:
+                response = await session.get(URL_wikirace + "/wikirace" + "/get_short_path", headers=headers,
+                                             json={"userId": user_id, "startUrl": a, "endUrl": b})
+
+                response.raise_for_status()
+                path = (await response.json())["path"]
+                await message.answer(path)
+        except aiohttp.ClientError as e:
             await message.answer(f"Ошибка при получении пути, не удалось получить путь от {a} до {b}: {e}")
 
     await state.finish()
@@ -81,64 +113,81 @@ async def get_path_b(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Command('add_exception_article'))
 async def add_exception_article_handler(message: types.Message):
-    await message.answer('Введите статью исключение:')
+    await message.answer('Введите список статей через запятую:')
     await AddExceptionArticle.waiting_for_article.set()
 
 
 @dp.message_handler(state=AddExceptionArticle.waiting_for_article)
-async def get_exception_article_handler(message: types.Message, state: FSMContext):
-    article = message.text
-    if not article:
-        await message.answer('Вы ввели пустую статью, попробуйте ещё раз')
+async def get_exception_articles_handler(message: types.Message, state: FSMContext):
+    articles = message.text.split(',')
+    articles = [article.strip() for article in articles if article.strip()]
+    if not articles:
+        await message.answer('Вы ввели пустой список статей, попробуйте ещё раз')
         return
-    user_id = message.from_user.id
+    user_id = str(message.from_user.id)
+
     try:
-        requests.put("http://localhost:8202/api/add_exception_article", data={"user_id": user_id, "article": article})
-        await message.answer('Статья добавлена в список исключений')
+        articles = await get_new_exceptions_list(user_id, articles)
+        requests.post(URL_wikirace + "/banned-titles", json={"userId": user_id, "titles": articles})
+        await message.answer('Статьи добавлены в список исключений')
     except requests.exceptions.RequestException as e:
-        await message.answer(f'Невозможно добавить статью в список исключений: {e}')
+        await message.answer(f'Невозможно добавить статьи в список исключений: {e}')
     finally:
         await state.finish()
 
 
 @dp.message_handler(commands=["delete_exception_article"])
-# function to delete exception article
-async def delete_exception_article(message: types.Message):
-    await bot.send_message(message.chat.id, 'Введите статью исключение для удаления:')
-    # Ждём следующий ввод от пользователя
-    await bot.register_next_step_handler(message, get_exception_article_for_delete)
+async def delete_exception_article_handler(message: types.Message):
+    await message.answer('Введите список статей через запятую, которые нужно удалить:')
+    await DeleteExceptionArticle.waiting_for_article.set()
 
 
-async def get_exception_article_for_delete(message: types.Message):
-    article = message.text
-    # проверяем на пустоту введённое сообщение
-    if not article:
+@dp.message_handler(state=DeleteExceptionArticle.waiting_for_article)
+async def get_exception_articles_for_delete_handler(message: types.Message, state: FSMContext):
+    articles = message.text.split(',')
+    articles = [article.strip() for article in articles if article.strip()]
+    if not articles:
+        await message.answer('Вы ввели пустой список статей, попробуйте ещё раз')
         return
-    # get user_id by telegram user_id
-    user_id = message.from_user.id
+    user_id = str(message.from_user.id)
     try:
-        # Удаляем статью из API
-        response = requests.delete("http://localhost:8202/api/delete_exception_article",
-                                   data={"user_id": user_id, "article": article})
-
-        # Проверяем код ответа
-        if response.status_code == 200:
-            await bot.send_message(message.chat.id, "Статья удалена из списка исключений")
-        else:
-            await bot.send_message(message.chat.id, "Произошла ошибка при выполнении операции удаления")
+        articles = await get_new_exceptions_list(user_id, articles)
+        requests.post(URL_wikirace + "/banned-titles", json={"userId": user_id, "titles": articles})
+        await message.answer('Статьи добавлены в список исключений')
     except requests.exceptions.RequestException as e:
-        await bot.send_message(message.chat.id, f"Произошла ошибка при выполнении операции удаления: {e}")
+        await message.answer(f'Невозможно удалить статьи из списка исключений: {e}')
+    finally:
+        await state.finish()
+
+
+async def get_deleted_list(user_id: int, list_for_delete: list):
+    try:
+        exceptions_list = await get_exception_list(user_id)
+        # exceptions_list - list_for_delete = list of articles that were not deleted
+        exceptions_list = [article for article in exceptions_list if article not in list_for_delete]
+        return exceptions_list
+    except requests.exceptions.RequestException as e:
+        return f"Ошибка при получении списка исключений. Попробуйте позже.: {e}"
+
+
+async def get_new_exceptions_list(user_id: int, list_for_add: list):
+    try:
+        exceptions_list = await get_exception_list(user_id)
+        # adding new unique values
+        exceptions_list = list(set(exceptions_list) | set(list_for_add))
+        return exceptions_list
+    except requests.exceptions.RequestException as e:
+        return f"Ошибка при получении списка исключений. Попробуйте позже.: {e}"
 
 
 @dp.message_handler(commands=["registration"])
 # function to register user
 async def registration(message: types.Message):
     # get user_id by telegram user_id
-    user_id = message.from_user.id
-    # put user_id to API
+    user_id = str(message.from_user.id)
     try:
-        response = requests.put("http://localhost:8202/api/registration",
-                                data={"user_id": user_id, "secret_key": secret_key})
+        response = requests.post(URL_auth + "/users",
+                                 json={"username": user_id, "password": secret_key})
         response.raise_for_status()
         # send message to user
         await message.answer("Пользователь зарегистрирован")
@@ -153,40 +202,60 @@ async def registration(message: types.Message):
 @dp.message_handler(commands=["login"])
 async def login(message: types.Message):
     # get user_id by telegram user_id
-    user_id = message.from_user.id
-    try:
-        response = requests.put("http://localhost:8202/api/authentication",
-                                data={"user_id": user_id, "secret_key": secret_key})
-        response.raise_for_status()  # генерирует исключение, если код ответа сервера >= 400
+    user_id = str(message.from_user.id)
+    isLogin = await login_user(user_id)
+    if isLogin:
         # send message to user
         await message.answer("Пользователь авторизован")
+    else:
+        await message.answer("Произошла ошибка при выполнении операции входа")
+
+
+# function to login user
+async def login_user(user_id):
+    try:
+        response = requests.post(URL_auth + "/authentication",
+                                 json={"username": user_id, "password": secret_key})
+        response.raise_for_status()  # генерирует исключение, если код ответа сервера >= 400
+        access_token = response.json().get("accessToken")
+        # save access_token to MongoDB with user_id as key
+        mongo_col.update_one({'user_id': user_id}, {'$set': {'access_token': access_token}}, upsert=True)
+        return True
     except requests.exceptions.HTTPError as e:
         # если код ответа сервера >= 400, то возникает исключение HTTPError
-        await message.answer(f"Произошла ошибка при выполнении операции входа: {e}")
+        print(f"Произошла ошибка при выполнении операции входа: {e}")
+        return False
     except requests.exceptions.RequestException as e:
         # если произошла какая-то другая ошибка при выполнении запроса, то возникает исключение RequestException
-        await message.answer(f"Произошла ошибка при выполнении операции входа: {e}")
+        print(f"Произошла ошибка при выполнении операции входа: {e}")
+        return False
 
 
 @dp.message_handler(commands=["watch_list_exceptions"])
 async def watch_list_exceptions(message: types.Message):
     user_id = message.from_user.id
     try:
-        exception_list = requests.get("http://localhost:8202/api/watch_list_exceptions",
-                                      data={"user_id": user_id, "secret_key": secret_key}).json()
-        exception_list = exception_list["exception_list"]
-        await message.answer(exception_list)
+        await message.answer(await get_exception_list(user_id))
     except requests.exceptions.RequestException as e:
         await message.answer(f"Ошибка при получении списка исключений. Попробуйте позже.: {e}")
+
+
+async def get_exception_list(user_id):
+    try:
+        response = requests.get(URL_wikirace + "/banned-titles" + f"/{user_id}")
+        response.raise_for_status()
+        exceptions_list = response.json()
+        return exceptions_list
+    except requests.exceptions.RequestException as e:
+        return f"Ошибка при получении списка исключений. Попробуйте позже.: {e}"
 
 
 @dp.message_handler(commands=["add_ordinary_subscription"])
 async def add_ordinary_subscription(message: types.Message):
     # get user_id by telegram user_id
-    user_id = message.from_user.id
-    # put article to API
+    user_id = str(message.from_user.id)
     try:
-        requests.put("http://localhost:8202/api/add_subscription", data={"user_id": user_id, "subscription_type": 0})
+        requests.post(URL_subscriptions + "/subscriptions", json={"userId": user_id, "level": "FIRST_LEVEL"})
         await message.answer("Обычная подписка активирована")
     except requests.exceptions.RequestException as e:
         await message.answer(f"Произошла ошибка при выполнении активации подписки: {e}")
@@ -196,9 +265,9 @@ async def add_ordinary_subscription(message: types.Message):
 @dp.message_handler(commands=["add_pro_subscription"])
 async def add_pro_subscription(message: types.Message):
     # get user_id by telegram user_id
-    user_id = message.from_user.id
+    user_id = str(message.from_user.id)
     try:
-        requests.put("http://localhost:8202/api/add_subscription", data={"user_id": user_id, "subscription_type": 1})
+        requests.post(URL_subscriptions + "/subscriptions", json={"userId": user_id, "level": "SECOND_LEVEL"})
         await message.answer("Про подписка активирована")
     except requests.exceptions.RequestException as e:
         await message.answer(f"Произошла ошибка при выполнении операции добавления в подписки: {e}")
@@ -210,12 +279,13 @@ async def delete_subscription(message: types.Message):
     if check_message_one_argument(message) is False:
         return
     # get user_id by telegram user_id
-    user_id = message.from_user.id
+    user_id = str(message.from_user.id)
     try:
-        requests.put("http://localhost:8202/api/add_subscription", data={"user_id": user_id, "subscription_type": 2})
+        requests.post(URL_subscriptions + "/subscriptions", json={"userId": user_id, "level": "THIRD_LEVEL"})
         await message.answer("Подписка деактивирована")
     except requests.exceptions.RequestException as e:
         await message.answer(f"Произошла ошибка при выполнении операции удаления из подписки: {e}")
+
 
 # start bot
 if __name__ == '__main__':

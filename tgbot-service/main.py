@@ -99,7 +99,7 @@ async def get_path_b(message: types.Message, state: FSMContext):
                 return
             headers = {"Authorization": f"Bearer {access_token}"}
             async with aiohttp.ClientSession() as session:
-                response = await session.get(URL_wikirace + "/wikirace" + "/get_short_path", headers=headers,
+                response = await session.post(URL_wikirace + "/wikirace" + "/get_short_path", headers=headers,
                                              json={"userId": user_id, "startUrl": a, "endUrl": b})
 
                 response.raise_for_status()

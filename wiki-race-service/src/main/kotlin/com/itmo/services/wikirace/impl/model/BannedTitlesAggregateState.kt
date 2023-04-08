@@ -14,13 +14,12 @@ class BannedTitlesAggregateState : AggregateState<String, BannedTitlesAggregate>
 
     fun updateBannedTitlesCommand(
         userId : String,
-        list : List<String>,
-        createTime: Date
+        list : List<String>
     ) : UpdateBannedTitlesEvent {
         return UpdateBannedTitlesEvent(
             userId = userId,
             list = list,
-            createTime = createTime,
+            createTime = Calendar.getInstance().time,
         )
     }
 

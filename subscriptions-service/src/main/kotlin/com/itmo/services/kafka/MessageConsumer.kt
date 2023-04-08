@@ -11,19 +11,20 @@ import org.springframework.stereotype.Service
 
 @Service
 class MessageConsumer(private val messageProducer: MessageProducer,
-                      private val subscriptionService : SubscriptionService) {
+                      private val subscriptionService : SubscriptionService
+) {
     @KafkaListener(
-        topics = [KafkaConfig.Wiki_topic],
-        groupId = KafkaConfig.Wiki_Group_id,
-        properties = ["key.deserializer=org.apache.kafka.common.serialization.StringDeserializer",
-            "value.deserializer=com.itmo.services.kafka.deserializers.SubscriptionInfoRequestMessageDeserializer"]
-    )
-    suspend fun consumeFromWiki(message: SubscriptionInfoRequestMessage) {
+        topics = [KafkaConfig.Get_SubscriptionInfo_topic],
+        groupId = KafkaConfig.Get_SubscriptionInfo_Group_id,
+        properties = [
+            "key.deserializer=org.apache.kafka.common.serialization.StringDeserializer",
+            "value.deserializer=com.itmo.services.kafka.deserializers.SubscriptionInfoRequestMessageDeserializer"])
+    fun consumeFromWiki(message: SubscriptionInfoRequestMessage) {
         kotlin.runCatching { subscriptionService.getSubscriptionInfoByUsername(message.username) }
             .onSuccess { subscriptionLevel ->
                 messageProducer.wikiProduceMessage(
                     SubscriptionInfoResponseMessage(subscriptionLevel, SubscriptionResponseEnum.OK),
-                    KafkaConfig.Wiki_topic + "-${message.topicId}"
+                    KafkaConfig.Get_SubscriptionInfo_topic + "-${message.topicId}"
                 )
             }
             .onFailure {
@@ -31,7 +32,7 @@ class MessageConsumer(private val messageProducer: MessageProducer,
                     SubscriptionInfoResponseMessage(
                         SubscriptionLevel.FIRST_LEVEL, SubscriptionResponseEnum.FAILED
                     ),
-                    KafkaConfig.Wiki_topic + "-${message.topicId}"
+                    KafkaConfig.Get_SubscriptionInfo_topic + "-${message.topicId}"
                 )
             }
     }

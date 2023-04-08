@@ -1,5 +1,6 @@
 package com.itmo.services.subscriptions.api.controller
 
+import com.itmo.services.subscriptions.api.models.GetSubscriptionLevelRequest
 import com.itmo.services.subscriptions.api.models.SubscriptionLevel
 import com.itmo.services.subscriptions.api.models.UpdateSubscriptionRequest
 import com.itmo.services.subscriptions.impl.service.SubscriptionService
@@ -36,7 +37,7 @@ class SubscriptionsController(private val subscriptionService : SubscriptionServ
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getSubscriptionLevel(@RequestBody userId: String) : SubscriptionLevel {
-      return subscriptionService.getSubscriptionInfoByUsername(userId)
+    fun getSubscriptionLevel(@RequestBody request: GetSubscriptionLevelRequest) : SubscriptionLevel {
+      return subscriptionService.getSubscriptionInfoByUsername(request.userId)
     }
 }

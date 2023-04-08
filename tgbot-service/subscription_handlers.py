@@ -12,7 +12,7 @@ async def get_level_status(user_id):
     headers = await get_headers(user_id)
 
     response = requests.post(URL_subscriptions + "/get", headers=headers,
-                             json=user_id)
+                             json={"userId": user_id})
     return response.json()
 
 

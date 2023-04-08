@@ -1,5 +1,10 @@
 package com.itmo.services.wikirace.impl.service
 
+import com.itmo.services.kafka.MessageConsumer
+import com.itmo.services.kafka.MessageProducer
+import com.itmo.services.kafka.config.KafkaConfig
+import com.itmo.services.kafka.models.SubscriptionInfoRequestMessage
+import com.itmo.services.kafka.models.SubscriptionLevel
 import com.itmo.services.wikirace.api.model.RequestDetailsModel
 import com.itmo.services.wikirace.api.model.ShortestPathDetails
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregate
@@ -28,7 +33,9 @@ fun getLinks(title: String): MutableList<String>? {
 @Service
 class WikiRacerService(
     private val bannedTitlesService: BannedTitlesService,
-    private val wikiRaceEsService: EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState>
+    private val wikiRaceEsService: EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState>,
+    private val messageConsumer: MessageConsumer,
+    private val messageProducer: MessageProducer
 
 ) {
     fun findShortestPath(requestDetails: RequestDetailsModel): ShortestPathDetails {
@@ -39,6 +46,12 @@ class WikiRacerService(
                 endUrl = requestDetails.endUrl,
             )
         }
+        val topicId : String = UUID.randomUUID().toString()
+        messageProducer.wikiProduceMessage(
+            SubscriptionInfoRequestMessage(topicId, requestDetails.userId),
+            KafkaConfig.Get_SubscriptionInfo_topic
+        )
+        val level : SubscriptionLevel = messageConsumer.subscriptionConsumer(topicId).level
 
         val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
         val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))

@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.itmo.services.kafka.models.SubscriptionInfoRequestMessage
 import org.apache.kafka.common.serialization.Deserializer
 
-
 class SubscriptionInfoRequestMessageDeserializer : Deserializer<SubscriptionInfoRequestMessage> {
     override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {
         super.configure(configs, isKey)

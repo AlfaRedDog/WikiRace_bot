@@ -7,12 +7,15 @@ import com.itmo.services.kafka.models.SubscriptionInfoRequestMessage
 import com.itmo.services.kafka.models.SubscriptionLevel
 import com.itmo.services.wikirace.api.model.RequestDetailsModel
 import com.itmo.services.wikirace.api.model.ShortestPathDetails
+import com.itmo.services.wikirace.exception.NotFoundException
+import com.itmo.services.wikirace.exception.SubscriptionException
+import com.itmo.services.wikirace.exception.TimeoutException
+import com.itmo.services.wikirace.exception.WrongArgumentsException
 import com.itmo.services.wikirace.impl.cache.WikiRaceRequestsLruCache
 import com.itmo.services.wikirace.impl.event.WikiRaceRequestCreatedEvent
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregate
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregateState
 import com.itmo.services.wikirace.impl.repository.WikiRaceRequestsRepository
-import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
@@ -25,7 +28,7 @@ import java.util.*
 import java.util.stream.Collectors
 
 
-
+const val TIMEOUT_MIN = 1
 
 @Service
 class WikiRacerService(
@@ -44,7 +47,7 @@ class WikiRacerService(
             val doc = Jsoup.parse(URL(url).openStream(), "ISO-8859-1", url)
             doc.select("a[href]").map { col -> col.attr("href") }.parallelStream().filter { it.startsWith("/wiki") }
                 .map { it.removePrefix("/wiki/") }.collect(Collectors.toList())
-        } catch (e: HttpStatusException) {
+        } catch (e: Exception) {
             null
         }
     }
@@ -93,6 +96,8 @@ class WikiRacerService(
     }
 
     fun findShortestPath(requestDetails: RequestDetailsModel): ShortestPathDetails {
+        val startTime = System.currentTimeMillis()
+
         val event = wikiRaceEsService.create {
             it.createWikiRacerRequestCommand(
                 userId = requestDetails.userId,
@@ -100,7 +105,13 @@ class WikiRacerService(
                 endUrl = requestDetails.endUrl,
             )
         }
-        val topicId : String = UUID.randomUUID().toString()
+
+        if (getLinks(requestDetails.startUrl) == null)
+            throw WrongArgumentsException(requestDetails.startUrl)
+        if (getLinks(requestDetails.endUrl) == null)
+            throw WrongArgumentsException(requestDetails.endUrl)
+
+        val topicId: String = UUID.randomUUID().toString()
         messageProducer.wikiProduceMessage(
             SubscriptionInfoRequestMessage(topicId, requestDetails.userId),
             KafkaConfig.Get_SubscriptionInfo_topic
@@ -114,21 +125,14 @@ class WikiRacerService(
 
         val requestNumberMade = getRequestNumberMadeByUserId(requestDetails.userId)
 
-        if ((requestNumberMade >= requestNumberBySubscription) and (requestNumberBySubscription != -1)) {
-            return ShortestPathDetails(
-                requestId = event.requestId,
-                userId = event.userId,
-                startUrl = event.startUrl,
-                endUrl = event.endUrl,
-                path = null
-            )
-        }
+        if ((requestNumberMade >= requestNumberBySubscription) and (requestNumberBySubscription != -1))
+            throw SubscriptionException(requestNumberBySubscription)
 
 
         val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
         val path = wikiRaceRequestsLruCache.get(event.startUrl, event.endUrl)
         if (path != null) {
-            if (!path.any{ it in bannedTitles})
+            if (!path.any { it in bannedTitles })
                 return finishWikiRace(event, path)
         }
         val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))
@@ -136,6 +140,12 @@ class WikiRacerService(
         nextLinks.add(event.startUrl)
 
         while (nextLinks.size != 0) {
+
+            val passedTime = (System.currentTimeMillis() - startTime) / 1000 / 60
+            if (passedTime >= TIMEOUT_MIN)
+                throw TimeoutException(passedTime)
+
+
             val page = nextLinks.first()
             nextLinks.remove(page)
             val links = getLinks(page)
@@ -166,12 +176,6 @@ class WikiRacerService(
             }
         }
 
-        return ShortestPathDetails(
-            requestId = event.requestId,
-            userId = event.userId,
-            startUrl = event.startUrl,
-            endUrl = event.endUrl,
-            path = null
-        )
+        throw NotFoundException()
     }
 }

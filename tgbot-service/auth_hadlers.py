@@ -28,6 +28,29 @@ async def registration(message: types.Message):
         await message.answer(f"Произошла ошибка при выполнении операции регистрации: {e}")
 
 
+@dp.message_handler(commands=["start"])
+# function to register user
+async def start(message: types.Message):
+    user_id = str(message.from_user.id)
+    try:
+        #registration
+        response = requests.post(URL_auth + "/users",
+                                 json={"username": user_id, "password": secret_key})
+        response.raise_for_status()
+
+        isLogin = await login_user(user_id)
+        if isLogin:
+            # send message to user
+            await message.answer("Пользователь авторизован")
+        else:
+            await message.answer("Произошла ошибка при выполнении операции входа")
+    except requests.exceptions.HTTPError as e:
+        # если код ответа сервера >= 400, то возникает исключение HTTPError
+        await message.answer(f"Произошла ошибка при выполнении операции регистрации: {e}")
+    except requests.exceptions.RequestException as e:
+        await message.answer(f"Произошла ошибка при выполнении операции регистрации: {e}")
+
+
 # function to login user
 @dp.message_handler(commands=["login"])
 async def login(message: types.Message):

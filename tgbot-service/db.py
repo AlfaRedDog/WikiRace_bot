@@ -12,3 +12,10 @@ async def get_access_token(user_id):
         return token['access_token']
     else:
         return None
+
+
+async def get_headers(user_id):
+    access_token = await get_access_token(user_id)
+    if not access_token:
+        return None
+    return {"Authorization": f"Bearer {access_token}"}

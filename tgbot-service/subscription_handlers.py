@@ -2,7 +2,7 @@ import aiohttp
 import requests
 from aiogram import types
 
-from common_functions import get_headers
+from db import get_headers
 from tg import dp
 
 URL_subscriptions = "http://localhost:8204/subscriptions"

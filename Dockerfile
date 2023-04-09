@@ -1,6 +1,6 @@
-FROM gcr.io/distroless/java11
+FROM openjdk:19-slim
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+WORKDIR /var/app
+COPY **/target/*.jar ./
 
-CMD ["/app.jar"]
+CMD ["bash", "-c", "java -jar ${SERVICE}*.jar"]

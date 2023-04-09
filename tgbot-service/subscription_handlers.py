@@ -51,9 +51,9 @@ async def add_pro_subscription(message: types.Message):
             await message.answer('У вас уже активирована про подписка - неограниченное количество запросов')
             return
         headers = await get_headers(user_id)
-        async with aiohttp.ClientSession() as session:
-            response = await session.post(URL_subscriptions + "/update", headers=headers,
-                                          json={"userId": user_id, "level": "THIRD_LEVEL"})
+        response = requests.post(URL_subscriptions + "/update", headers=headers,
+                                 json={"userId": user_id, "level": "THIRD_LEVEL"})
+        response.raise_for_status()
         level = await get_level_status(user_id)
         if level == "THIRD_LEVEL":
             await message.answer('Про подписка активирована')

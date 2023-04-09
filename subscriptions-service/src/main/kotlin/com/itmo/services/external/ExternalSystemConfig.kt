@@ -1,8 +1,8 @@
 package com.itmo.services.external
 
 object ExternalSystemConfig {
-    private const val host = "http://localhost:8080"
-    const val paymentUrl = "$host/transactions/payment"
-    const val projectUrl = "$host/management/projects"
-    const val clientSecretUrl = "$host/management/accounts"
+    private val host: String = System.getenv("EXTERNAL_SYS") ?: "http://localhost:8080"
+    val paymentUrl = "$host/transactions/payment"
+    val projectUrl = "$host/management/projects"
+    val clientSecretUrl = "$host/management/accounts"
 }

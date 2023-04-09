@@ -1,30 +1,125 @@
 version: "3.8"
 
 services:
-  app:
-    image: ghcr.io/microservices-itmo-21-22/demo-service:${APP_VERSION:-latest}
+  auth-service:
+    container_name: auth-service
+    image: ghcr.io/tiove/wiki-bot-la-chance-final:latest
+    ports:
+      - "8202:8202"
+    env_file:
+      - common.env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-app:5432/app
+      SERVICE: AuthService
+    depends_on:
+      - postgres-app
+      - mongo-app
+      - broker
+    networks:
+      - wiki-network
+
+  subscriptions-service:
+    container_name: subscriptions-service
+    image: ghcr.io/tiove/wiki-bot-la-chance-final:latest
+    ports:
+      - "8204:8204"
+    env_file:
+      - common.env
+    environment:
+      SERVICE: SubscriptionsService
+      EXTERNAL_SYS: http://tps:8080
+    command: ["bash", "-c", "sleep 15 && java -jar SubscriptionsService*.jar"]
+    depends_on:
+      - postgres-app
+      - mongo-app
+      - tps
+      - broker
+    networks:
+      - wiki-network
+
+  wiki-race-service:
+    container_name: wiki-race-service
+    image: ghcr.io/tiove/wiki-bot-la-chance-final:latest
+    ports:
+      - "8206:8206"
+    env_file:
+      - common.env
+    environment:
+      SERVICE: WikiRaceService
+    depends_on:
+      - postgres-app
+      - mongo-app
+      - broker
+    networks:
+      - wiki-network
+
+  tps:
+    container_name: external-system-tps
+    image: ghcr.io/tiove/wiki-bot-la-chance-final:external-system-tps
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres-app:5432/tps'
       SPRING_DATASOURCE_USERNAME: app
       SPRING_DATASOURCE_PASSWORD: app
     depends_on:
-      postgres-app:
-        condition: service_healthy
+      - postgres-app
+    networks:
+      - wiki-network
 
   postgres-app:
+    container_name: postgres-db
     image: postgres:14-alpine
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: app
       POSTGRES_DB: app
       POSTGRES_PASSWORD: app
-      PGUSER: app # for healthchecks
     volumes:
       - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U app"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    command: >
+      bash -c "echo 'CREATE DATABASE tps;' > /docker-entrypoint-initdb.d/init-db.sql && docker-entrypoint.sh postgres"
+    networks:
+      - wiki-network
 
+  mongo-app:
+    container_name: mongo-db
+    image: mongo:6.0.5
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - wiki-network
+
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.3.2
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - wiki-network
+
+  broker:
+    container_name: broker
+    image: confluentinc/cp-kafka:7.3.2
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - wiki-network
+networks:
+  wiki-network:
 volumes:
   pg_data:
+  mongo_data:

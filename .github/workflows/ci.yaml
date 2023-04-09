@@ -76,7 +76,7 @@ jobs:
         id: meta_tgbot
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/${{ github.repository }}/tgbot
+          images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -113,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile-tgbot # Укажите путь к Dockerfile-tgbot
+          dockerfile: Dockerfile-tgbot
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta_tgbot.outputs.tags }}

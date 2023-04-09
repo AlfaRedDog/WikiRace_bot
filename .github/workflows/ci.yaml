@@ -72,7 +72,7 @@ jobs:
             type=raw,value=latest
 
       - name: Docker image meta for tgbot
-        if: github.event_name == 'push'
+#         if: github.event_name == 'push'
         id: meta_tgbot
         uses: docker/metadata-action@v3
         with:
@@ -96,7 +96,7 @@ jobs:
           echo ::set-output name=jar::${JAR_PATH}.jar
 
       - name: Setup QEMU
-        if: github.event_name == 'push'
+#         if: github.event_name == 'push'
         uses: docker/setup-qemu-action@v1
 
       - name: Build and push Docker image
@@ -109,7 +109,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and push Docker image for tgbot
-        if: github.event_name == 'push'
+#         if: github.event_name == 'push'
         uses: docker/build-push-action@v2
         with:
           context: .

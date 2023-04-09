@@ -121,7 +121,7 @@ services:
 
   tgbot-service:
       container_name: tgbot-service
-      image: ghcr.io/tiove/wiki-bot-la-chance-final:tgbot-latest
+      image: ghcr.io/tiove/wiki-bot-la-chance-final/tgbot:latest
       build:
         context: .
         dockerfile: Dockerfile-tgbot

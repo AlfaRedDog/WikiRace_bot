@@ -76,14 +76,14 @@ jobs:
         id: meta_tgbot
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}/tgbot
           tags: |
             type=ref,event=branch
             type=ref,event=tag
             type=ref,event=pr
             type=sha
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=tgbot-latest
+            type=raw,value=latest
 
       - name: Build with Maven
         env:

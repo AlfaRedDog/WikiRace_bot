@@ -74,7 +74,7 @@ class SubscriptionService(
         subscriptionEventSourcingService.create {
             it.createNewSubscriptionCommand(
                 userId = request.userId,
-                level = request.level
+                level = SubscriptionLevel.FIRST_LEVEL
             )
         }
     }

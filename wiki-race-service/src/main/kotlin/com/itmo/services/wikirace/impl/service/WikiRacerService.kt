@@ -108,7 +108,7 @@ class WikiRacerService(
         )
 
         val requestNumberBySubscription = when (messageConsumer.subscriptionConsumer(topicId).level) {
-            SubscriptionLevel.FIRST_LEVEL -> 10000
+            SubscriptionLevel.FIRST_LEVEL -> 1
             SubscriptionLevel.SECOND_LEVEL -> 20
             SubscriptionLevel.THIRD_LEVEL -> -1
         }

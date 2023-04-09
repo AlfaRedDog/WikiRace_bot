@@ -58,6 +58,7 @@ jobs:
           echo ::set-output name=version::${POM_VERSION}
 
       - name: Docker image meta
+        if: github.event_name == 'push'
         id: meta
         uses: docker/metadata-action@v3
         with:
@@ -69,6 +70,20 @@ jobs:
             type=sha
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=latest
+
+      - name: Docker image meta for tgbot
+        if: github.event_name == 'push'
+        id: meta_tgbot
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/${{ github.repository }}/tgbot
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=tgbot-latest
 
       - name: Build with Maven
         env:
@@ -92,3 +107,13 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Build and push Docker image for tgbot
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          dockerfile: Dockerfile-tgbot # Укажите путь к Dockerfile-tgbot
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta_tgbot.outputs.tags }}

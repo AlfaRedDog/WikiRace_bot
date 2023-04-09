@@ -1,5 +1,6 @@
 import aiohttp
 import requests
+import os
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
@@ -8,7 +9,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from db import get_headers
 from tg import dp
 
-URL_wikirace = "http://localhost:8206"
+URL_wikirace = os.environ.get('WIKI_RACE_SERVICE', 'http://localhost:8206')
 
 
 class AddExceptionArticle(StatesGroup):

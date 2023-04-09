@@ -1,4 +1,5 @@
 import requests
+import os
 from aiogram import types
 
 # Подключение к MongoDB
@@ -6,8 +7,7 @@ from db import mongo_col
 from tg import dp
 
 secret_key = "c3I5JLzXzyUq2Hy9T867JZp0oy2Ppmgg"
-
-URL_auth = "http://localhost:8202"
+URL_auth = os.environ.get('AUTH_SERVICE', 'http://localhost:8202')
 
 
 @dp.message_handler(commands=["registration"])

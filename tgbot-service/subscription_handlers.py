@@ -1,11 +1,12 @@
 import aiohttp
 import requests
+import os
 from aiogram import types
 
 from db import get_headers
 from tg import dp
 
-URL_subscriptions = "http://localhost:8204/subscriptions"
+URL_subscriptions = f"{os.environ.get('SUB_SERVICE', 'http://localhost:8204')}/subscriptions"
 
 
 async def get_level_status(user_id):

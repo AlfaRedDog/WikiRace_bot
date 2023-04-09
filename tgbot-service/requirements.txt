@@ -1,0 +1,4 @@
+requests
+aiogram
+pymongo
+aiohttp

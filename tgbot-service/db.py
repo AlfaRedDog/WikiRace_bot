@@ -1,6 +1,7 @@
 import pymongo
+import os
 
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_client = pymongo.MongoClient(os.environ.get('MONGO_DB', 'mongodb://localhost:27017/'))
 mongo_db = mongo_client['mydatabase']
 mongo_col = mongo_db['access_tokens']
 

@@ -1,4 +1,4 @@
-FROM openjdk:19-slim
+FROM openjdk:11-slim
 
 WORKDIR /var/app
 COPY **/target/*.jar ./

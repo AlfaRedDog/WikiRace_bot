@@ -118,6 +118,28 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     networks:
       - wiki-network
+
+  tgbot-service:
+      container_name: tgbot-service
+      image: ghcr.io/tiove/wiki-bot-la-chance-final:tgbot-latest
+      build:
+        context: .
+        dockerfile: Dockerfile-tgbot
+      environment:
+        AUTH_SERVICE: http://auth-service:8202
+        SUB_SERVICE: http://subscriptions-service:8204
+        WIKI_RACE_SERVICE: http://wiki-race-service:8206
+        MONGO_DB: mongodb://mongo-app:27017
+      depends_on:
+        - auth-service
+        - subscriptions-service
+        - wiki-race-service
+        - mongo-app
+        - tps
+        - broker
+      restart: always
+      networks:
+        - wiki-network
 networks:
   wiki-network:
 volumes:

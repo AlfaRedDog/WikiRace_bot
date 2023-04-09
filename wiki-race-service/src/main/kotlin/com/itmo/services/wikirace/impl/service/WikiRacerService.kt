@@ -9,11 +9,16 @@ import com.itmo.services.wikirace.api.model.RequestDetailsModel
 import com.itmo.services.wikirace.api.model.ShortestPathDetails
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregate
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregateState
+import com.itmo.services.wikirace.impl.repository.WikiRaceRequestsRepository
 import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import ru.quipy.core.EventSourcingService
 import java.net.URL
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 import java.util.stream.Collectors
 
@@ -33,11 +38,26 @@ fun getLinks(title: String): MutableList<String>? {
 @Service
 class WikiRacerService(
     private val bannedTitlesService: BannedTitlesService,
+    private val wikiRaceRequestsRepository : WikiRaceRequestsRepository,
     private val wikiRaceEsService: EventSourcingService<UUID, WikiRacerAggregate, WikiRacerAggregateState>,
     private val messageConsumer: MessageConsumer,
     private val messageProducer: MessageProducer
 
 ) {
+
+    private fun getRequestNumberMadeByUserId(userId: String): Int {
+
+        val today = ZonedDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT, ZoneId.systemDefault())
+        val tomorrow = today.plusDays(1)
+
+
+        return wikiRaceRequestsRepository
+            .getWikiRaceRequestRecordsByTimestampBetweenAndUserId(
+                Date.from(today.toInstant()).time,
+                Date.from(tomorrow.toInstant()).time, userId
+            ).size
+
+    }
     fun findShortestPath(requestDetails: RequestDetailsModel): ShortestPathDetails {
         val event = wikiRaceEsService.create {
             it.createWikiRacerRequestCommand(
@@ -51,7 +71,25 @@ class WikiRacerService(
             SubscriptionInfoRequestMessage(topicId, requestDetails.userId),
             KafkaConfig.Get_SubscriptionInfo_topic
         )
-        val level : SubscriptionLevel = messageConsumer.subscriptionConsumer(topicId).level
+
+        val requestNumberBySubscription = when (messageConsumer.subscriptionConsumer(topicId).level) {
+            SubscriptionLevel.FIRST_LEVEL -> 1
+            SubscriptionLevel.SECOND_LEVEL -> 20
+            SubscriptionLevel.THIRD_LEVEL -> -1
+        }
+
+        val requestNumberMade = getRequestNumberMadeByUserId(requestDetails.userId)
+
+        if ((requestNumberMade >= requestNumberBySubscription) and (requestNumberBySubscription != -1)) {
+            return ShortestPathDetails(
+                requestId = event.requestId,
+                userId = event.userId,
+                startUrl = event.startUrl,
+                endUrl = event.endUrl,
+                path = null
+            )
+        }
+
 
         val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
         val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))
@@ -69,7 +107,7 @@ class WikiRacerService(
                 }
                 val replacedLinks = links.map { l -> l.replace('.', '_') }.toList()
 
-                for (link in replacedLinks) {
+                for (link in links) {
                     if (link == event.endUrl) {
                         wikiRaceEsService.update(event.wikiRaceId) {
                             it.closeWikiRacerRequestCommand(
@@ -106,7 +144,6 @@ class WikiRacerService(
             }
         }
 
-        // TODO: make no path output
         return ShortestPathDetails(
             requestId = event.requestId,
             userId = event.userId,

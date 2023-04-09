@@ -88,12 +88,11 @@ class WikiRacerAggregateState : AggregateState<UUID, WikiRacerAggregate> {
 
     @StateTransitionFunc
     fun indexPage(event: PageIndexedEvent) {
+        nextLinks.remove(event.urlRoot)
         for (link in event.links) {
             if (!(pathMapper.containsKey(link)) and (link != event.urlRoot)) {
                 pathMapper[link] = pathMapper[event.urlRoot]!! + link
-                nextLinks.remove(event.urlRoot)
                 nextLinks.add(link)
-
             }
         }
     }

@@ -41,8 +41,8 @@ class WikiRacerService(
     private fun getLinks(title: String): MutableList<String>? {
         val wiki = "https://en.wikipedia.org/wiki/"
         val url = "$wiki$title"
-        val doc = Jsoup.parse(URL(url).openStream(), "ISO-8859-1", url)
         return try {
+            val doc = Jsoup.parse(URL(url).openStream(), "ISO-8859-1", url)
             doc.select("p a[href]").map { col -> col.attr("href") }.parallelStream().filter { it.startsWith("/wiki") }
                 .map { it.removePrefix("/wiki/") }.collect(Collectors.toList())
         } catch (e: HttpStatusException) {
@@ -125,11 +125,13 @@ class WikiRacerService(
             )
         }
 
-        val path = wikiRaceRequestsLruCache.get(event.startUrl, event.endUrl)
-        if (path != null)
-            return finishWikiRace(event, path)
 
         val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
+        val path = wikiRaceRequestsLruCache.get(event.startUrl, event.endUrl)
+        if (path != null) {
+            if (!path.any{ it in bannedTitles})
+                return finishWikiRace(event, path)
+        }
         val pathMapper = mutableMapOf(event.startUrl to listOf(event.startUrl))
         val nextLinks = LinkedList<String>()
         nextLinks.add(event.startUrl)

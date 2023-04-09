@@ -27,6 +27,7 @@ services:
     environment:
       SERVICE: SubscriptionsService
       EXTERNAL_SYS: http://tps:8080
+    command: ["bash", "-c", "sleep 15 && java -jar SubscriptionsService*.jar"]
     depends_on:
       - postgres-app
       - mongo-app
@@ -52,7 +53,7 @@ services:
       - wiki-network
 
   tps:
-    container_name: external-system
+    container_name: external-system-tps
     image: ghcr.io/tiove/wiki-bot-la-chance-final:external-system-tps
     ports:
       - 8080:8080

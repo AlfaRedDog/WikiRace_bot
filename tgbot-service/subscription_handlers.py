@@ -14,7 +14,9 @@ async def get_level_status(user_id):
 
     response = requests.post(URL_subscriptions + "/get", headers=headers,
                              json={"userId": user_id})
-    return response.json()
+
+    level_status = await response.json()
+    return level_status
 
 
 @dp.message_handler(commands=["add_ordinary_subscription"])

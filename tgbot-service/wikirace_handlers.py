@@ -8,6 +8,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 import asyncio
 
 from db import get_headers
+from graph import create_graph
 from tg import dp
 
 URL_wikirace = os.environ.get('WIKI_RACE_SERVICE', 'http://localhost:8206')
@@ -46,30 +47,30 @@ async def get_path_a(message: types.Message, state: FSMContext):
 async def get_path_b(message: types.Message, state: FSMContext):
     global a, b
     b = message.text
-    async with state.proxy() as data:
-        data["b"] = b
-        try:
-            user_id = str(message.from_user.id)
-            headers = await get_headers(user_id)
-            async with aiohttp.ClientSession() as session:
-                # Оповещаем о том, что запрос обрабатывается
-                await message.answer("Ищем путь...")
-                response = await asyncio.wait_for(session.post(
-                    URL_wikirace + "/wikirace" + "/get_short_path",
-                    headers=headers,
-                    json={"userId": user_id, "startUrl": a, "endUrl": b},
-                    timeout=300),
-                    timeout=305)
-                response_json = await response.json()
-                path = response_json["path"]
-                await message.answer(path)
-        except asyncio.TimeoutError:
-            await message.answer("Поиск пути занял слишком много времени. Попробуйте еще раз.")
-        except aiohttp.ClientError as e:
-            e_message = response.json().get("message")
-            await message.answer(f"Ошибка при получении пути, не удалось получить путь от {a} до {b}: {e_message}")
-
-    await state.finish()
+    try:
+        user_id = str(message.from_user.id)
+        headers = await get_headers(user_id)
+        await message.answer("Ищем путь...")
+        response = requests.post(
+            URL_wikirace + "/wikirace" + "/get_short_path",
+            headers=headers,
+            json={"userId": user_id, "startUrl": a, "endUrl": b},
+            timeout=200)
+        response.raise_for_status()
+        path = response.json().get("path")
+        if path is not None:
+            await create_graph(path)
+            await message.answer_photo(types.InputFile("path.png"), caption=path)
+        else:
+            await message.answer("Вы достигли лимита для вашей подписки")
+    except asyncio.TimeoutError:
+        await message.answer("Поиск пути занял слишком много времени. Попробуйте еще раз.")
+    except requests.exceptions.RequestException as e:
+        e_message = response.json().get("message")
+        await message.answer(f"Ошибка при получении пути, не удалось получить путь от {a} до {b}: {e_message}")
+    finally:
+        # Сбрасываем состояние
+        await state.finish()
 
 
 @dp.message_handler(commands=["watch_list_exceptions"])

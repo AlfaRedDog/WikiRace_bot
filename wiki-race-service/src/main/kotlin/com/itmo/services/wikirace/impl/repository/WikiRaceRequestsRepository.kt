@@ -20,6 +20,5 @@ data class WikiRaceRequestRecord(
 
 @Repository
 interface WikiRaceRequestsRepository : MongoRepository<WikiRaceRequestRecord, UUID> {
-    fun getAllByUserId(userId: UUID): List<WikiRaceRequestRecord>
-    fun getAllByRequestId(orderId: UUID): List<WikiRaceRequestRecord>
+    fun getWikiRaceRequestRecordsByTimestampBetweenAndUserId(todayStart: Long, todayEnd: Long, userId: String): List<WikiRaceRequestRecord>
 }

@@ -15,7 +15,7 @@ import java.util.*
 class MessageConsumer(private val messageProducer: MessageProducer) {
     fun subscriptionConsumer(topicId : String) : SubscriptionInfoResponseMessage{
         val kafkaProps = Properties()
-        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS")
         kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Get_SubscriptionInfo_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = SubscriptionInfoResponseMessageDeserializer::class.java.name

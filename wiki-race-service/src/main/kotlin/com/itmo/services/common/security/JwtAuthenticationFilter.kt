@@ -38,7 +38,7 @@ class JwtAuthenticationFilter(): OncePerRequestFilter() {
         }
 
         val kafkaProps = Properties()
-        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS")
         kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Wiki_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = AuthResponseMessageDeserializer::class.java.name

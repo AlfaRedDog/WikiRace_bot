@@ -28,7 +28,7 @@ import java.util.*
 import java.util.stream.Collectors
 
 
-const val TIMEOUT_MIN = 1
+const val TIMEOUT_MIN = 3
 
 @Service
 class WikiRacerService(

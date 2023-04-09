@@ -19,7 +19,7 @@ jobs:
           - event: pull_request
             push_image: false
 
-    if: github.event_name == matrix.event
+    if: github.event_name == matrix.conditions.event
     permissions:
       contents: read
       packages: write

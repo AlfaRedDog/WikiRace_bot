@@ -37,13 +37,12 @@ class WikiRacerService(
     private val wikiRaceRequestsLruCache: WikiRaceRequestsLruCache
 
 ) {
-
     private fun getLinks(title: String): MutableList<String>? {
         val wiki = "https://en.wikipedia.org/wiki/"
         val url = "$wiki$title"
         return try {
             val doc = Jsoup.parse(URL(url).openStream(), "ISO-8859-1", url)
-            doc.select("p a[href]").map { col -> col.attr("href") }.parallelStream().filter { it.startsWith("/wiki") }
+            doc.select("a[href]").map { col -> col.attr("href") }.parallelStream().filter { it.startsWith("/wiki") }
                 .map { it.removePrefix("/wiki/") }.collect(Collectors.toList())
         } catch (e: HttpStatusException) {
             null

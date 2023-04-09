@@ -5,6 +5,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.dispatcher.filters.state import State, StatesGroup
+import asyncio
 
 from db import get_headers
 from tg import dp
@@ -25,7 +26,6 @@ class PathState(StatesGroup):
     b = State()
 
 
-# function to get path from A to B
 @dp.message_handler(commands=["get_path"])
 async def get_path(message: types.Message):
     global a, b
@@ -52,13 +52,22 @@ async def get_path_b(message: types.Message, state: FSMContext):
             user_id = str(message.from_user.id)
             headers = await get_headers(user_id)
             async with aiohttp.ClientSession() as session:
-                response = await session.post(URL_wikirace + "/wikirace" + "/get_short_path", headers=headers,
-                                              json={"userId": user_id, "startUrl": a, "endUrl": b})
+                # Оповещаем о том, что запрос обрабатывается
+                await message.answer("Ищем путь...")
+                response = await asyncio.wait_for(session.post(
+                    URL_wikirace + "/wikirace" + "/get_short_path",
+                    headers=headers,
+                    json={"userId": user_id, "startUrl": a, "endUrl": b},
+                    timeout=300),
+                    timeout=305)
                 response_json = await response.json()
                 path = response_json["path"]
                 await message.answer(path)
+        except asyncio.TimeoutError:
+            await message.answer("Поиск пути занял слишком много времени. Попробуйте еще раз.")
         except aiohttp.ClientError as e:
-            await message.answer(f"Ошибка при получении пути, не удалось получить путь от {a} до {b}: {e}")
+            e_message = response.json().get("message")
+            await message.answer(f"Ошибка при получении пути, не удалось получить путь от {a} до {b}: {e_message}")
 
     await state.finish()
 

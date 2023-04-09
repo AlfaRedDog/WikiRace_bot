@@ -14,6 +14,7 @@ async def get_level_status(user_id):
 
     response = requests.post(URL_subscriptions + "/get", headers=headers,
                              json={"userId": user_id})
+
     return response.json()
 
 

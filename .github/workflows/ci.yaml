@@ -86,6 +86,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build with Maven
+        if: github.event_name == 'push'
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,7 +114,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile-tgbot
+          file: Dockerfile-tgbot
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta_tgbot.outputs.tags }}

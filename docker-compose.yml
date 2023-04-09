@@ -53,7 +53,7 @@ services:
 
   tps:
     container_name: external-system
-    image: ghcr.io/tiove/wiki-bot-la-chance-final:external-system
+    image: ghcr.io/tiove/wiki-bot-la-chance-final:external-system-tps
     ports:
       - 8080:8080
     environment:

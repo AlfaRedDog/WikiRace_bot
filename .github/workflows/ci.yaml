@@ -14,6 +14,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        platform:
+          - amd64
+          - arm64
 
     steps:
       - name: Check out the repo
@@ -67,8 +72,8 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
             type=sha
-            type=raw,value=${{ steps.version.outputs.version }},enable=${{ endsWith(github.ref, 'main') }}
-            type=raw,value=latest,enable=${{ endsWith(github.ref, 'main') }}
+            type=raw,value=${{ steps.version.outputs.version }}-${{ matrix.platform }},enable=${{ endsWith(github.ref, 'main') }}
+            type=raw,value=latest-${{ matrix.platform }},enable=${{ endsWith(github.ref, 'main') }}
 
       - name: Build with Maven
         env:
@@ -85,5 +90,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/${{ matrix.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}

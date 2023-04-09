@@ -12,10 +12,10 @@ import java.time.Duration
 import java.util.*
 
 @Service
-class MessageConsumer(private val messageProducer: MessageProducer) {
+class MessageConsumer {
     fun subscriptionConsumer(topicId : String) : SubscriptionInfoResponseMessage{
         val kafkaProps = Properties()
-        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS")
+        kafkaProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
         kafkaProps[ConsumerConfig.GROUP_ID_CONFIG] = KafkaConfig.Get_SubscriptionInfo_Group_id
         kafkaProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.name
         kafkaProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = SubscriptionInfoResponseMessageDeserializer::class.java.name

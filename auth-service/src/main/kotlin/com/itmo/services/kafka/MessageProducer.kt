@@ -14,7 +14,7 @@ class MessageProducer {
         val producerRecord: ProducerRecord<String, AuthResponseMessage> = ProducerRecord(topic, message)
 
         val map = mutableMapOf<String, String>()
-        map[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS")
+        map[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
         map[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = "org.apache.kafka.common.serialization.StringSerializer"
         map[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java.name
 

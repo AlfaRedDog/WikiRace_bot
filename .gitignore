@@ -35,3 +35,4 @@ build/
 docker-compose.override.yml
 .env
 .DS_store
+__pycache__

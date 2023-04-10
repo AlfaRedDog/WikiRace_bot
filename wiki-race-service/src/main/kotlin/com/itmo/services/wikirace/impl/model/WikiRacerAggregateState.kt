@@ -26,8 +26,6 @@ class WikiRacerAggregateState : AggregateState<UUID, WikiRacerAggregate> {
         endUrl: String,
     ): WikiRaceRequestCreatedEvent {
 
-        //TODO: check start url and end url
-
         return WikiRaceRequestCreatedEvent(
             wikiRaceId = UUID.randomUUID(),
             userId = userId,

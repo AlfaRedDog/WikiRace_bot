@@ -7,10 +7,7 @@ import com.itmo.services.kafka.models.SubscriptionInfoRequestMessage
 import com.itmo.services.kafka.models.SubscriptionLevel
 import com.itmo.services.wikirace.api.model.RequestDetailsModel
 import com.itmo.services.wikirace.api.model.ShortestPathDetails
-import com.itmo.services.wikirace.exception.NotFoundException
-import com.itmo.services.wikirace.exception.SubscriptionException
-import com.itmo.services.wikirace.exception.TimeoutException
-import com.itmo.services.wikirace.exception.WrongArgumentsException
+import com.itmo.services.wikirace.exception.*
 import com.itmo.services.wikirace.impl.cache.WikiRaceRequestsLruCache
 import com.itmo.services.wikirace.impl.event.WikiRaceRequestCreatedEvent
 import com.itmo.services.wikirace.impl.model.WikiRacerAggregate
@@ -57,6 +54,11 @@ class WikiRacerService(
 
     private fun decodeKey(key: String): String {
         return key.replace("\\u002e", ".")
+    }
+
+    private fun titleIsValid(title: String, bannedTitles: List<String>): Boolean {
+        return if (getLinks(title) == null) false
+        else !bannedTitles.contains(title)
     }
 
     private fun getRequestNumberMadeByUserId(userId: String): Int {
@@ -130,6 +132,12 @@ class WikiRacerService(
 
 
         val bannedTitles = bannedTitlesService.getBannedTitlesForUser(event.userId)
+
+        if (bannedTitles.contains(requestDetails.startUrl))
+            throw BannedTitleException(requestDetails.startUrl)
+        if (bannedTitles.contains(requestDetails.endUrl))
+            throw BannedTitleException(requestDetails.endUrl)
+
         val path = wikiRaceRequestsLruCache.get(event.startUrl, event.endUrl)
         if (path != null) {
             if (!path.any { it in bannedTitles })
@@ -164,14 +172,6 @@ class WikiRacerService(
                         pathMapper[link] = pathMapper[page]!! + link
                         nextLinks.add(link)
                     }
-
-                }
-                wikiRaceEsService.update(event.wikiRaceId) {
-                    it.indexPageCommand(
-                        requestId = event.requestId,
-                        urlRoot = encodeKey(page),
-                        links = links.map { l -> encodeKey(l) }.toList(),
-                    )
                 }
             }
         }

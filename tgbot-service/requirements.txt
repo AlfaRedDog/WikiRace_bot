@@ -2,3 +2,5 @@ requests
 aiogram
 pymongo
 aiohttp
+networkx
+matplotlib

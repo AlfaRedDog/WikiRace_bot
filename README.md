@@ -1,21 +1,21 @@
 # WikiRace service
 ## About project
-  ###Task
+  ### Task
    The input is the title of page A and page B from Wikipedia (domain: en.wikipedia.org). You have to find the shortest path (the number of jumps from one page to   another) from page A to page B.
 
-  ###Authentication
+  ### Authentication
    The system works on a subscription system and provides three subscription options:
    free use (1 request per day)
    Standard subscription (20 requests per day)
    Pro subscription (unlimited number of requests).
 
-  ###Administering
+  ### Administering
    The system provides the ability to enter certain pages in the list of banned for search / navigation through them. 
 
-  ###Using
+  ### Using
    A REST API is provided to interact with the system. The REST API is available and documented through swagger
 
-  ###Deployment
+  ### Deployment
    Deployment of the system is done using the docker compose file in a docker container. 
 
 ## Launch notes
